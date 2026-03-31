@@ -5,7 +5,6 @@ import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
-//new code 
 import Login from "./Pages/Login";
 import Home from "./Pages/Home";
 import Dashboard from "./Pages/Dashboard";
