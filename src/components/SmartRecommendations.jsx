@@ -31,7 +31,14 @@ function HealthRing({ score, label }) {
   return (
     <div className="flex flex-col items-center gap-1">
       <svg width="96" height="96" viewBox="0 0 96 96">
-        <circle cx="48" cy="48" r={r} fill="none" stroke="#e5e7eb" strokeWidth="7" />
+        <circle
+          cx="48"
+          cy="48"
+          r={r}
+          fill="none"
+          stroke="#e5e7eb"
+          strokeWidth="7"
+        />
         <circle
           cx="48"
           cy="48"
@@ -43,7 +50,14 @@ function HealthRing({ score, label }) {
           strokeLinecap="round"
           transform="rotate(-90 48 48)"
         />
-        <text x="48" y="44" textAnchor="middle" fill={color} fontSize="18" fontWeight="800">
+        <text
+          x="48"
+          y="44"
+          textAnchor="middle"
+          fill={color}
+          fontSize="18"
+          fontWeight="800"
+        >
           {score}
         </text>
         <text x="48" y="60" textAnchor="middle" fill="#6b7280" fontSize="9">
@@ -83,7 +97,10 @@ function Skeleton() {
       </div>
 
       {[...Array(5)].map((_, i) => (
-        <div key={i} className="bg-white border border-gray-200 rounded-2xl p-5 animate-pulse">
+        <div
+          key={i}
+          className="bg-white border border-gray-200 rounded-2xl p-5 animate-pulse"
+        >
           <div className="flex gap-3">
             <div className="w-10 h-10 rounded-xl bg-gray-200" />
             <div className="flex-1 space-y-2">
@@ -97,7 +114,7 @@ function Skeleton() {
   );
 }
 
-export default function SmartRecommendations() {
+export default function SmartRecommendations({ compact = false }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -127,7 +144,9 @@ export default function SmartRecommendations() {
         </div>
 
         <div>
-          <h2 className="text-gray-800 font-bold text-lg">AI Smart Budget Analysis</h2>
+          <h2 className="text-gray-800 font-bold text-lg">
+            AI Smart Budget Analysis
+          </h2>
           <p className="text-gray-500 text-sm mt-1">
             Analyzes your transactions and gives smart ₹ savings tips
           </p>
@@ -149,7 +168,10 @@ export default function SmartRecommendations() {
     return (
       <div className="bg-white border border-red-200 rounded-2xl p-6 text-center space-y-3 shadow-sm">
         <p className="text-red-500 text-sm">⚠️ {error}</p>
-        <button onClick={fetchSuggestions} className="text-teal-500 underline text-sm">
+        <button
+          onClick={fetchSuggestions}
+          className="text-teal-500 underline text-sm"
+        >
           Retry
         </button>
       </div>
@@ -157,6 +179,25 @@ export default function SmartRecommendations() {
   }
 
   if (!data) return null;
+
+  // ✅ COMPACT VIEW (for Reports page)
+  if (compact && data) {
+    return (
+      <div className="bg-white border  border-gray-200 rounded-xl p-4 space-y-2 shadow-sm">
+        <h3 className="text-sm font-semibold text-gray-700">🤖 AI Insights</h3>
+
+        <p className="text-xs text-gray-500">
+          {data.summary || "No insights available"}
+        </p>
+
+        {data.suggestions?.slice(0, 2).map((s, i) => (
+          <p key={i} className="text-xs text-gray-600">
+            • {s.title}
+          </p>
+        ))}
+      </div>
+    );
+  }
 
   const {
     summary,
@@ -177,9 +218,21 @@ export default function SmartRecommendations() {
           <HealthRing score={health_score} label={health_label} />
 
           <div className="flex-1 grid grid-cols-3 gap-3">
-            <StatPill label="Savings Rate" value={`${savings_rate}%`} color={rateColor} />
-            <StatPill label="Needs (50%)" value={fmt(budget_50_30_20?.needs)} color="#6366f1" />
-            <StatPill label="Save Goal" value={fmt(budget_50_30_20?.savings)} color="#14b8a6" />
+            <StatPill
+              label="Savings Rate"
+              value={`${savings_rate}%`}
+              color={rateColor}
+            />
+            <StatPill
+              label="Needs (50%)"
+              value={fmt(budget_50_30_20?.needs)}
+              color="#6366f1"
+            />
+            <StatPill
+              label="Save Goal"
+              value={fmt(budget_50_30_20?.savings)}
+              color="#14b8a6"
+            />
           </div>
         </div>
       </div>
@@ -209,7 +262,9 @@ export default function SmartRecommendations() {
               <div className="flex-1">
                 <div className="flex justify-between items-center mb-1">
                   <p className="text-sm font-bold text-gray-800">{s.title}</p>
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full ${style.pill}`}>
+                  <span
+                    className={`text-[10px] px-2 py-0.5 rounded-full ${style.pill}`}
+                  >
                     {style.label}
                   </span>
                 </div>
@@ -225,7 +280,10 @@ export default function SmartRecommendations() {
             </div>
 
             <div className="mt-4 h-0.5 bg-gray-200 rounded-full overflow-hidden">
-              <div className={`${style.bar} h-full`} style={{ width: style.width }} />
+              <div
+                className={`${style.bar} h-full`}
+                style={{ width: style.width }}
+              />
             </div>
           </div>
         );

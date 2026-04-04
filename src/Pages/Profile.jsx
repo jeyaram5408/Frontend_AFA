@@ -16,6 +16,7 @@ import { useNavigate } from "react-router-dom";
 const Profile = () => {
   const [activeTab, setActiveTab] = useState("basic");
   const navigate = useNavigate();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -292,7 +293,7 @@ const Profile = () => {
 
           <button
             className="w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition"
-            onClick={handleLogout}
+            onClick={() => setShowLogoutConfirm(true)}
           >
             Logout
           </button>
@@ -528,6 +529,36 @@ const Profile = () => {
           </div>
         </div>
       </div>
+      {/* LOGOUT CONFIRM MODAL */}
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-50">
+          <div className="bg-white w-80 rounded-2xl shadow-xl p-6">
+            <h2 className="text-lg font-semibold text-gray-800 mb-2">
+              Confirm Logout
+            </h2>
+
+            <p className="text-sm text-gray-500 mb-6">
+              Are you sure you want to logout?
+            </p>
+
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowLogoutConfirm(false)}
+                className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={handleLogout}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 };

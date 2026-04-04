@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
 
 import { getCategories } from "../api/categoryApi";
 import TransactionCard from "../components/TransactionCard";
 
 import delete_icon from "../assets/delete-alt-2-svgrepo-com.svg";
+
+import { useNavigate, useLocation } from "react-router-dom";
 
 import { toast } from "react-toastify";
 
@@ -23,7 +24,7 @@ const Transactions = () => {
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
   const [date, setDate] = useState("");
-
+  const location = useLocation();
   const [selectedIds, setSelectedIds] = useState([]);
   const [showForm, setShowForm] = useState(false);
 
@@ -45,6 +46,12 @@ const Transactions = () => {
 
   const inputStyle = "w-full border p-2 rounded h-12";
 
+  useEffect(() => {
+    if (location.state?.openExpense) {
+      setType("expense");
+      setShowForm(true);
+    }
+  }, [location.state]);
   // =============================
   // FETCH TRANSACTIONS
   // =============================
@@ -70,7 +77,36 @@ const Transactions = () => {
   };
 
   // =============================
-  // LAST 7 DAYS FILTER
+  // LAST 1 MONTH FILTER
+  // =============================
+  const lastMonthTransactions = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const lastMonth = new Date();
+    lastMonth.setMonth(today.getMonth() - 1);
+    lastMonth.setHours(0, 0, 0, 0);
+
+    return (transactions || []).filter((t) => {
+      if (!t.date) return false;
+
+      const tDate = new Date(t.date.split("T")[0]);
+      tDate.setHours(0, 0, 0, 0);
+
+      return tDate >= lastMonth && tDate <= today;
+    });
+  }, [transactions]);
+
+  const lastMonthIncome = lastMonthTransactions
+    .filter((t) => t.type?.toLowerCase() === "income")
+    .reduce((acc, t) => acc + Number(t.amount), 0);
+
+  const lastMonthExpense = lastMonthTransactions
+    .filter((t) => t.type?.toLowerCase() === "expense")
+    .reduce((acc, t) => acc + Number(t.amount), 0);
+
+  // =============================
+  // LAST 7 DAYS TOTAL
   // =============================
 
   const last7DaysTransactions = useMemo(() => {
@@ -93,6 +129,14 @@ const Transactions = () => {
       })
       .sort((a, b) => new Date(b.date) - new Date(a.date));
   }, [transactions]);
+
+  const last7DaysIncome = last7DaysTransactions
+    .filter((t) => t.type?.toLowerCase() === "income")
+    .reduce((acc, t) => acc + Number(t.amount), 0);
+
+  const last7DaysExpense = last7DaysTransactions
+    .filter((t) => t.type?.toLowerCase() === "expense")
+    .reduce((acc, t) => acc + Number(t.amount), 0);
   // =============================
   // CATEGORIES
   // =============================
@@ -226,36 +270,34 @@ const Transactions = () => {
     .reduce((acc, t) => acc + Number(t.amount), 0);
 
   return (
-    <div className="space-y-10 px-6 py-6 bg-gray-50 min-h-screen">
-      <button
+    <div className="space-y-5 sm:space-y-10 px-3 sm:px-6 py-4 sm:py-6 bg-gray-50 min-h-screen">
+      {/* <button
         onClick={() => navigate(-1)}
         className="mb-4 text-blue-600 hover:underline"
       >
         ← Back
-      </button>
+      </button> */}
       {/* HEADER */}
-      <div className="flex justify-between items-center">
-        <h2 className="text-3xl font-bold text-gray-800">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <h2 className="text-xl sm:text-3xl font-bold text-gray-800">
           Manage Transactions
         </h2>
-
-        <div className="flex gap-4">
+        <div className="flex gap-2 sm:gap-4 w-full sm:w-auto">
           <button
             onClick={() => {
               setType("income");
               setShowForm(true);
             }}
-            className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition cursor-pointer"
+            className="flex-1 sm:flex-none bg-green-600 text-white px-3 sm:px-6 py-2 sm:py-3 rounded-lg hover:bg-green-700 transition cursor-pointer text-sm sm:text-base"
           >
             + Income
           </button>
-
           <button
             onClick={() => {
               setType("expense");
               setShowForm(true);
             }}
-            className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition cursor-pointer"
+            className="flex-1 sm:flex-none bg-red-600 text-white px-3 sm:px-6 py-2 sm:py-3 rounded-lg hover:bg-red-700 transition cursor-pointer text-sm sm:text-base"
           >
             + Expense
           </button>
@@ -263,15 +305,30 @@ const Transactions = () => {
       </div>
 
       {/* SUMMARY */}
-      <div className="grid md:grid-cols-2 gap-6">
-        <div className="p-6 bg-green-100 rounded-2xl">
-          <h3>Total Income</h3>
-          <p className="text-2xl font-bold">₹ {income.toLocaleString()}</p>
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+        <div className="p-3 sm:p-6 bg-green-100 rounded-2xl">
+          <h3 className="text-xs sm:text-base">Total Income</h3>
+          <p className="text-base sm:text-2xl font-bold">
+            ₹ {income.toLocaleString()}
+          </p>
         </div>
-
-        <div className="p-6 bg-red-100 rounded-2xl">
-          <h3>Total Expense</h3>
-          <p className="text-2xl font-bold">₹ {expense.toLocaleString()}</p>
+        <div className="p-3 sm:p-6 bg-red-100 rounded-2xl">
+          <h3 className="text-xs sm:text-base">Total Expense</h3>
+          <p className="text-base sm:text-2xl font-bold">
+            ₹ {expense.toLocaleString()}
+          </p>
+        </div>
+        <div className="p-3 sm:p-6 bg-green-50 rounded-2xl">
+          <h3 className="text-xs sm:text-base">Last 7 Days Income</h3>
+          <p className="text-base sm:text-2xl font-bold">
+            ₹ {last7DaysIncome.toLocaleString()}
+          </p>
+        </div>
+        <div className="p-3 sm:p-6 bg-red-50 rounded-2xl">
+          <h3 className="text-xs sm:text-base">Last 7 Days Expense</h3>
+          <p className="text-base sm:text-2xl font-bold">
+            ₹ {last7DaysExpense.toLocaleString()}
+          </p>
         </div>
       </div>
 
@@ -315,7 +372,9 @@ const Transactions = () => {
         </div>
 
         {last7DaysTransactions.length === 0 ? (
-          <p>No Transactions</p>
+          <div className="flex justify-center items-center h-full">
+            <p className="text-gray-500 text-lg font-medium">No Transactions</p>
+          </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4  gap-4 items-stretch">
             {" "}
@@ -354,7 +413,7 @@ const Transactions = () => {
             state: { transactions },
           })
         }
-        className="text-blue-600 mt-4 flex items-center gap-1 hover:underline transition cursor-pointer "
+        className="text-gray-600 mt-4 flex items-center gap-1 hover:underline transition cursor-pointer ml-auto"
       >
         View Full History
         <span>→</span>

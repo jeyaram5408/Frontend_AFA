@@ -8,7 +8,7 @@ const AIAdvise = () => {
       {/* Header */}
       <div className="space-y-1">
         <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 flex items-center gap-2">
-          🤖 <span>AI Financial Advice</span>
+           <span>AI Financial Advice</span>
         </h2>
 
         <p className="text-xs sm:text-sm text-gray-500">

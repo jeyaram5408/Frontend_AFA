@@ -1,14 +1,13 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import PageWrapper from "../PageWrapper";
-
+import DashboardCarousel from "../components/DashboardCarousel";
 function Home() {
   const navigate = useNavigate();
-
+  const token = localStorage.getItem("access_token");
   return (
     <PageWrapper>
       <div className="bg-linear-to-b from-blue-50 to-white text-gray-800 scroll-smooth">
-
         {/* NAVBAR */}
         <header className="flex justify-between items-center px-10 py-5 shadow bg-white sticky top-0 z-50">
           <h1 className="text-2xl font-bold text-indigo-600">
@@ -16,14 +15,28 @@ function Home() {
           </h1>
 
           <nav className="space-x-8 font-medium hidden md:block">
-            <a href="#home" className="hover:text-indigo-600">Home</a>
-            <a href="#features" className="hover:text-indigo-600">Features</a>
-            <a href="#how" className="hover:text-indigo-600">How It Works</a>
-            <a href="#contact" className="hover:text-indigo-600">Contact</a>
+            <a href="#home" className="hover:text-indigo-600">
+              Home
+            </a>
+            <a href="#features" className="hover:text-indigo-600">
+              Features
+            </a>
+            <a href="#how" className="hover:text-indigo-600">
+              How It Works
+            </a>
+            <a href="#contact" className="hover:text-indigo-600">
+              Contact
+            </a>
           </nav>
 
           <button
-            onClick={() => navigate("/login")}
+            onClick={() => {
+              if (token) {
+                navigate("/dashboard");
+              } else {
+                navigate("/login");
+              }
+            }}
             className="bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700 transition"
           >
             Login / Register
@@ -33,41 +46,52 @@ function Home() {
         {/* HERO */}
         <section
           id="home"
-          className="grid md:grid-cols-2 gap-10 px-10 py-20 items-center"
+          className="grid md:grid-cols-5 gap-10 px-10 pt-10 pb-10 items-center min-h-[80vh] place-items-center"
         >
-          <div>
-            <h2 className="text-5xl font-bold leading-tight">
-              Track. Analyze.
+          {/* Left */}
+          <div className="md:col-span-2 flex flex-col justify-start items-start space-y-12">
+            {" "}
+            <div>
+              <h2 className="text-5xl font-bold leading-tight">
+                Track. Analyze.
+                <span className="text-green-600">Grow.</span>
+              </h2>
 
-              <span className="text-green-600">Grow.</span>
-            </h2>
-
-            <p className="mt-6 text-lg text-gray-600">
-              Track income & expenses, generate financial health score,
-              and receive AI-powered smart budget recommendations.
-            </p>
-
-            <div className="mt-8 space-x-4">
+              <p className="mt-6 text-lg text-gray-600">
+                Track income & expenses, generate financial health score, and
+                receive AI-powered smart budget recommendations.
+              </p>
+            </div>
+            <div className="flex space-x-4">
               <button
-                onClick={() => navigate("/register")}
+                onClick={() => {
+                  if (token) navigate("/dashboard");
+                  else navigate("/register");
+                }}
                 className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition"
               >
                 Get Started
               </button>
 
               <button
-                onClick={() => navigate("/dashboard")}
+                onClick={() => {
+                  if (token) navigate("/dashboard");
+                  else navigate("/register");
+                }}
                 className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
               >
                 View Dashboard
               </button>
             </div>
+            <p className="text-gray-600 text-[16px]">
+              Designed to help you understand your spending, save smarter, and
+              grow your wealth.
+            </p>
           </div>
-
-          <div className="bg-white p-8 rounded-3xl shadow-xl">
-            <div className="h-64 bg-linear-to-r from-green-400 to-blue-500 rounded-xl flex items-center justify-center text-white font-semibold text-lg">
-              Dashboard Preview
-            </div>
+          {/* RIGHT */}
+          <div className="md:col-span-3 bg-white p-6 rounded-3xl shadow-xl h-full self-start overflow-hidden">
+            {" "}
+            <DashboardCarousel />
           </div>
         </section>
 
@@ -78,10 +102,11 @@ function Home() {
           </h2>
 
           <div className="grid md:grid-cols-3 gap-8">
- 
             <div className="p-8 bg-gray-100 rounded-2xl shadow hover:shadow-xl transition">
               <div className="w-14 h-14 bg-green-300 rounded-full mb-5"></div>
-              <h3 className="font-semibold text-lg">Income & Expense Tracking</h3>
+              <h3 className="font-semibold text-lg">
+                Income & Expense Tracking
+              </h3>
               <p className="text-gray-600 mt-2 text-sm">
                 Easily add, categorize, and monitor your financial transactions.
               </p>
@@ -91,26 +116,26 @@ function Home() {
               <div className="w-14 h-14 bg-blue-300 rounded-full mb-5"></div>
               <h3 className="font-semibold text-lg">Financial Health Score</h3>
               <p className="text-gray-600 mt-2 text-sm">
-                Analyze your savings ratio and understand your financial stability.
+                Analyze your savings ratio and understand your financial
+                stability.
               </p>
             </div>
 
             <div className="p-8 bg-gray-100 rounded-2xl shadow hover:shadow-xl transition">
               <div className="w-14 h-14 bg-purple-300 rounded-full mb-5"></div>
-              <h3 className="font-semibold text-lg">Smart Budget Suggestions</h3>
+              <h3 className="font-semibold text-lg">
+                Smart Budget Suggestions
+              </h3>
               <p className="text-gray-600 mt-2 text-sm">
                 Get AI-powered suggestions to improve your saving habits.
               </p>
             </div>
-
           </div>
         </section>
 
         {/* HOW IT WORKS */}
         <section id="how" className="px-10 py-20 bg-blue-50">
-          <h2 className="text-3xl font-bold text-center mb-12">
-            How It Works
-          </h2>
+          <h2 className="text-3xl font-bold text-center mb-12">How It Works</h2>
 
           <div className="grid md:grid-cols-4 text-center gap-8">
             {[
@@ -138,7 +163,6 @@ function Home() {
           <p className="mt-2">jeyaram5408@gmail.com</p>
           <p className="mt-4">© 2026 AI Finance Advisor</p>
         </footer>
-
       </div>
     </PageWrapper>
   );

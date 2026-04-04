@@ -30,8 +30,8 @@ import AdminAnalytics from "./Admin_Page/AdminAnalytics";
 import AdminLogs from "./Admin_Page/AdminLogs";
 import AdminAISuggestions from "./Admin_Page/AdminAISuggestions";
 import AdminUserDetails from "./Admin_Page/AdminUserDetails";
-import AdminLogin from "./Admin_Page/AdminLogin";                 
-import AdminProtectedRoute from "./Admin_Page/AdminProtectedRoute"; 
+import AdminLogin from "./Admin_Page/AdminLogin";
+import AdminProtectedRoute from "./Admin_Page/AdminProtectedRoute";
 import AdminMedia from "./Admin_Page/AdminMedia";
 
 import { AnimatePresence } from "framer-motion";
@@ -46,19 +46,22 @@ function App() {
     <AnimatePresence mode="sync">
       <ToastContainer position="top-right" autoClose={2000} theme="colored" />
       <Routes location={location} key={location.pathname}>
-
         {/* ── Public Routes ── */}
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+       <Route path="/" element={<Home />} />
+        <Route
+          path="/login"
+          element={isAuth ? <Navigate to="/dashboard" /> : <Login />}
+        />{" "}
+        <Route
+          path="/register"
+          element={isAuth ? <Navigate to="/dashboard" /> : <Register />}
+        />{" "}
         <Route path="/verify-otp" element={<VerifyOTP />} />
         <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
-
         {/* ── Admin Login ── ✅ NEW */}
         <Route path="/admin/login" element={<AdminLogin />} />
-
         {/* ── User Dashboard ── */}
         <Route
           path="/dashboard"
@@ -81,7 +84,6 @@ function App() {
           <Route path="history" element={<History />} />
           <Route path="ai-advise" element={<AIAdvise />} />
         </Route>
-
         {/* ── Admin Panel ── ✅ PROTECTED */}
         <Route
           path="/admin"
@@ -101,7 +103,6 @@ function App() {
           <Route path="logs" element={<AdminLogs />} />
           <Route path="ai-suggestion" element={<AdminAISuggestions />} />
         </Route>
-
         {/* ── Fallback ── */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>

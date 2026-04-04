@@ -9,6 +9,8 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
+import { useNavigate } from "react-router-dom";
+
 const COLORS = [
   "#4F46E5",
   "#EF4444",
@@ -19,10 +21,25 @@ const COLORS = [
 ];
 
 const ExpensePieChart = ({ data = [] }) => {
+  const navigate = useNavigate();
+
   if (!data || data.length === 0) {
     return (
-      <div className="bg-white p-6 rounded-2xl shadow-md border min-h-50 flex items-center justify-center">
+      <div className="bg-white p-6 rounded-2xl shadow-md border min-h-50 flex flex-col items-center justify-center gap-4">
+       <p  className="text-gray-800 text-base"> Expense Pie Chart</p>
         <p className="text-gray-400">No expense data available</p>
+
+        {/* 🔥 ADD BUTTON */}
+        <button
+          onClick={() =>
+            navigate("/dashboard/transactions", {
+              state: { openExpense: true },
+            })
+          }
+          className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
+        >
+          + Add Expense
+        </button>
       </div>
     );
   }

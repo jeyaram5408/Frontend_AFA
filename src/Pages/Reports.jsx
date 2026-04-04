@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { getReportData } from "../api/reportApi";
 import ExpenseForecast from "../components/ExpenseForecast";
+import { useNavigate } from "react-router-dom";
 import {
   BarChart,
   Bar,
@@ -13,11 +14,12 @@ import {
   Legend,
 } from "recharts";
 import { motion } from "framer-motion";
-
+import SmartRecommendations from "../components/SmartRecommendations";
 const Reports = () => {
   const [showFilter, setShowFilter] = useState(false);
   const [filterMode, setFilterMode] = useState("range");
   const [report, setReport] = useState(null);
+  const navigate = useNavigate();
   const today = new Date().toISOString().split("T")[0];
   const [filters, setFilters] = useState({
     start_date: "",
@@ -88,6 +90,7 @@ const Reports = () => {
   const summary = report?.summary || {};
   const chart = report?.chart || [];
   const noData = chart.length === 0;
+  const chartHeight = noData ? 120 : 300;
 
   const forecast = report?.forecast || {};
 
@@ -104,33 +107,35 @@ const Reports = () => {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="space-y-12 max-w-scren mx-auto px-6"
+      className="space-y-6 sm:space-y-12 max-w-screen mx-auto px-3 sm:px-6"
     >
       {/* HEADER */}
       <div>
-        <h2 className="text-4xl font-bold text-gray-800">Reports & Insights</h2>
+        <h2 className="text-2xl sm:text-4xl font-bold text-gray-800">
+          Reports & Insights
+        </h2>
         <p className="text-gray-500">Financial intelligence overview</p>
       </div>
 
       {/* SUMMARY */}
-      <div className="grid md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-3xl shadow">
-          <p className="text-sm text-gray-500">Financial Score</p>
-          <h3 className="text-4xl font-bold text-indigo-600 mt-2">
+      <div className="grid grid-cols-3 gap-2 sm:gap-6">
+        <div className="bg-white p-3 sm:p-6 rounded-2xl sm:rounded-3xl shadow">
+          <p className="text-xs sm:text-sm text-gray-500">Financial Score</p>
+          <h3 className="text-xl sm:text-4xl font-bold text-indigo-600 mt-1 sm:mt-2">
             {summary.score || 0}%
           </h3>
         </div>
 
-        <div className="bg-white p-6 rounded-3xl shadow">
-          <p className="text-sm text-gray-500">Savings</p>
-          <h3 className="text-4xl font-bold text-green-600 mt-2">
+        <div className="bg-white p-3 sm:p-6 rounded-2xl sm:rounded-3xl shadow">
+          <p className="text-xs sm:text-sm text-gray-500">Savings</p>
+          <h3 className="text-xl sm:text-4xl font-bold text-green-600 mt-1 sm:mt-2">
             ₹{summary.savings?.toFixed(2) || "0.00"}
           </h3>
         </div>
 
-        <div className="bg-white p-6 rounded-3xl shadow">
-          <p className="text-sm text-gray-500">Expense Ratio</p>
-          <h3 className="text-4xl font-bold text-red-500 mt-2">
+        <div className="bg-white p-3 sm:p-6 rounded-2xl sm:rounded-3xl shadow">
+          <p className="text-xs sm:text-sm text-gray-500">Expense Ratio</p>
+          <h3 className="text-xl sm:text-4xl font-bold text-red-500 mt-1 sm:mt-2">
             {(summary.expense_ratio || 0).toFixed(1)}%
           </h3>
         </div>
@@ -339,12 +344,21 @@ const Reports = () => {
         <h3 className="text-lg font-semibold mb-4">Income vs Expense</h3>
 
         {noData && (
-          <p className="text-center text-gray-400 mt-6 text-sm">
-            🚫 No data available for selected filters
-          </p>
-        )}
+          <div className="text-center mt-8 space-y-4">
+            <p className="text-gray-400 text-sm">
+              🚫 No data available for selected filters
+            </p>
 
-        <ResponsiveContainer width="100%" height={300}>
+            <button
+              onClick={() => navigate("/dashboard/transactions")}
+              className="bg-indigo-600 text-white px-4 py-2 rounded-xl shadow hover:bg-indigo-700 transition"
+            >
+              ➕ Add Expense
+            </button>
+          </div>
+        )}
+        <ResponsiveContainer width="100%" height={chartHeight}>
+          {" "}
           <BarChart data={scaledChart} barCategoryGap="30%">
             <XAxis
               dataKey="month"
@@ -389,7 +403,7 @@ const Reports = () => {
       </div>
 
       {/* FORECAST + DONUT */}
-      <div className="grid lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* DONUT */}
         <div className="bg-white p-6 rounded-3xl shadow text-center">
           <h3 className="text-lg font-semibold mb-4">Savings Rate</h3>
@@ -423,16 +437,12 @@ const Reports = () => {
         <ExpenseForecast forecast={forecast} />
 
         {/* AI */}
-        <div className="bg-linear-to-r from-purple-500 to-indigo-600 text-white p-6 rounded-3xl shadow">
-          <h3 className="text-lg font-semibold">AI Insight</h3>
+        <div className="bg-white p-6 rounded-3xl shadow flex flex-col justify-between h-full">
+          <h3 className="text-lg font-semibold mb-4">AI Insights</h3>
 
-          <p className="mt-4">
-            {(summary.expense_ratio || 0) > 70
-              ? "⚠️ High spending detected"
-              : (summary.expense_ratio || 0) > 50
-                ? "💡 Try to save more"
-                : "✅ Excellent budgeting"}
-          </p>
+          <div className="flex-1">
+            <SmartRecommendations compact={true} />
+          </div>
         </div>
       </div>
     </motion.div>

@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import API from "../api/apiClient";
+import { toast } from "react-toastify";
 
 function VerifyEmail() {
   const [params] = useSearchParams();
@@ -12,17 +13,27 @@ function VerifyEmail() {
     if (token) {
       API.get(`/authentication/verify-email?token=${token}`)
         .then(() => {
-          alert("Email verified successfully");
-          navigate("/login"); // ✅ redirect
+          toast.success("Email verified successfully 🎉");
+
+          setTimeout(() => {
+            navigate("/login");
+          }, 1500);
         })
         .catch(() => {
-          alert("Invalid or expired link");
-          navigate("/register");
+          toast.error("Invalid or expired link ❌");
+
+          setTimeout(() => {
+            navigate("/register");
+          }, 1500);
         });
     }
   }, []);
 
-  return <h2 className="text-center mt-10">Verifying your email...</h2>;
+  return (
+    <h2 className="text-center mt-10 text-lg font-semibold">
+      Verifying your email...
+    </h2>
+  );
 }
 
 export default VerifyEmail;

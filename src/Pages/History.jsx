@@ -49,8 +49,8 @@ const History = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <h2 className="text-3xl font-bold">Transaction History</h2>
+    <div className="p-3 sm:p-6 space-y-4 sm:space-y-6">
+      <h2 className="text-xl sm:text-3xl font-bold">Transaction History</h2>
 
       {/* FILTER */}
       <select
@@ -74,7 +74,7 @@ const History = () => {
       ) : (
         <>
           {/* GRID */}
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-5 ">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-5">
             {transactions.map((t) => (
               <div
                 key={t.id}

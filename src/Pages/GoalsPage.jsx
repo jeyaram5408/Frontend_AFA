@@ -204,7 +204,9 @@ const GoalsPage = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <div>
-          <h2 className="text-3xl font-bold text-gray-800">🎯 Savings Goals</h2>
+          <h2 className="text-xl sm:text-3xl font-bold text-gray-800">
+            Savings Goals
+          </h2>
           <br />
           <p className="text-base text-gray-500 mt-1">
             Track goals like Laptop, Mobile, Bike, Vacation separately instead
@@ -221,7 +223,7 @@ const GoalsPage = () => {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 xl:grid-cols-4 gap-2 sm:gap-4">
         <StatCard
           title="Active Goals"
           value={summary?.active_goals_count || 0}

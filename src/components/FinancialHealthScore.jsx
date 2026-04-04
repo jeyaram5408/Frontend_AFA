@@ -1,11 +1,6 @@
 import React from "react";
-import {
-  FaRobot,
-  FaCheckCircle,
-  FaArrowUp,
-  FaArrowDown,
-} from "react-icons/fa";
-
+import { FaRobot, FaCheckCircle, FaArrowUp, FaArrowDown } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 const FinancialHealthScore = ({
   score = 0,
   label = "Fair",
@@ -13,6 +8,8 @@ const FinancialHealthScore = ({
   actions = [],
   adjustmentReason = "",
   aiAdjustment = 0,
+  expense = 0, // <-- expense prop
+  onAddExpense = null, // <-- click handler
 }) => {
   const safeScore = Math.min(Number(score || 0), 100);
 
@@ -20,15 +17,15 @@ const FinancialHealthScore = ({
     safeScore >= 70
       ? "bg-green-500"
       : safeScore >= 40
-      ? "bg-yellow-500"
-      : "bg-red-500";
-
+        ? "bg-yellow-500"
+        : "bg-red-500";
+  const navigate = useNavigate();
   const labelStyle =
     safeScore >= 70
       ? "bg-green-100 text-green-700 border border-green-200"
       : safeScore >= 40
-      ? "bg-yellow-100 text-yellow-700 border border-yellow-200"
-      : "bg-red-100 text-red-700 border border-red-200";
+        ? "bg-yellow-100 text-yellow-700 border border-yellow-200"
+        : "bg-red-100 text-red-700 border border-red-200";
 
   const adjustmentStyle =
     Number(aiAdjustment) >= 0
@@ -36,7 +33,8 @@ const FinancialHealthScore = ({
       : "bg-red-100 text-red-700 border border-red-200";
 
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
+    <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-100 max-h-105 overflow-y-auto">
+      {" "}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left Section - Score */}
         <div className="flex flex-col gap-10">
@@ -72,7 +70,20 @@ const FinancialHealthScore = ({
               financial behavior.
             </p>
           </div>
-
+          {safeScore === 0 && (
+            <div className="flex justify-center">
+              <button
+                onClick={() =>
+                  navigate("/dashboard/transactions", {
+                    state: { openExpense: true },
+                  })
+                }
+                className="bg-red-600 text-white px-3 py-3 text-sm rounded-md hover:bg-red-700 transition"
+              >
+                + Add Expense
+              </button>
+            </div>
+          )}
           <div className="mt-5 grid grid-cols-2 gap-3">
             <div className="rounded-xl bg-gray-50 border border-gray-100 p-3">
               <p className="text-sm text-gray-500 mb-1">Score Status</p>
@@ -104,7 +115,8 @@ const FinancialHealthScore = ({
         </div>
 
         {/* Right Section - AI Suggestion Bar */}
-        <div className="rounded-2xl border border-indigo-100 bg-linear-to-r from-indigo-50 via-white to-purple-50 p-4">
+        <div className="rounded-2xl border border-indigo-100 bg-linear-to-r from-indigo-50 via-white to-purple-50 p-4 max-h-88 overflow-y-auto">
+          {" "}
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-full bg-indigo-100 text-indigo-600">
@@ -128,13 +140,11 @@ const FinancialHealthScore = ({
               Impact
             </span>
           </div>
-
           <div className="mt-4 rounded-xl bg-white border border-indigo-100 px-4 py-3 shadow-sm">
             <p className="text-sm text-gray-700 leading-6">
               {summary || "No AI suggestions available right now."}
             </p>
           </div>
-
           {adjustmentReason && (
             <div className="mt-3 rounded-lg bg-indigo-50 border border-indigo-100 px-3 py-2">
               <p className="text-xs text-indigo-700 font-medium">
@@ -142,7 +152,6 @@ const FinancialHealthScore = ({
               </p>
             </div>
           )}
-
           {actions?.length > 0 && (
             <div className="mt-4">
               <p className="text-sm font-semibold text-gray-800 mb-3">

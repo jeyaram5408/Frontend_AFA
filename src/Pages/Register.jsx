@@ -3,6 +3,7 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import PageWrapper from "../PageWrapper";
 import { useNavigate } from "react-router-dom";
 import API from "../api/apiClient";
+import { toast } from "react-toastify";
 
 function Register() {
   const navigate = useNavigate();
@@ -18,7 +19,6 @@ function Register() {
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [popup, setPopup] = useState({ show: false, message: "" });
 
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   const passwordRegex = {
@@ -36,70 +36,73 @@ function Register() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    let newErrors = {};
+  let newErrors = {};
 
-    if (!form.name.trim()) newErrors.name = "Name is required";
-    if (!emailRegex.test(form.email)) newErrors.email = "Invalid email format";
+  if (!form.name.trim()) newErrors.name = "Name is required";
+  if (!emailRegex.test(form.email)) newErrors.email = "Invalid email format";
 
-    if (!passwordRegex.length.test(form.password)) {
-      newErrors.password = "Password must be at least 5 characters";
-    } else if (!passwordRegex.upper.test(form.password)) {
-      newErrors.password = "Password must contain at least one uppercase letter";
-    } else if (!passwordRegex.number.test(form.password)) {
-      newErrors.password = "Password must contain at least one digit";
-    } else if (!passwordRegex.special.test(form.password)) {
-      newErrors.password = "Password must contain at least one special character";
-    }
+  if (!passwordRegex.length.test(form.password)) {
+    newErrors.password = "Password must be at least 5 characters";
+  } else if (!passwordRegex.upper.test(form.password)) {
+    newErrors.password = "Password must contain at least one uppercase letter";
+  } else if (!passwordRegex.number.test(form.password)) {
+    newErrors.password = "Password must contain at least one digit";
+  } else if (!passwordRegex.special.test(form.password)) {
+    newErrors.password = "Password must contain at least one special character";
+  }
 
-    if (form.password !== form.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match";
-    }
+  if (form.password !== form.confirmPassword) {
+    newErrors.confirmPassword = "Passwords do not match";
+  }
 
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
+  if (Object.keys(newErrors).length > 0) {
+    setErrors(newErrors);
+    return;
+  }
 
-    try {
-      setErrors({});
-      setLoading(true);
+  try {
+    setErrors({});
+    setLoading(true);
 
-      await API.post("/authentication/register", {
-        name: form.name,
-        email: form.email,
-        password: form.password,
+    await API.post("/authentication/register", {
+      name: form.name,
+      email: form.email,
+      password: form.password,
+    });
+
+    localStorage.setItem("verifyEmail", form.email);
+
+    toast.success("Registered successfully 🎉 Check your email to verify");
+
+    setTimeout(() => {
+      navigate("/verify-otp", { state: { email: form.email } });
+    }, 1500);
+
+  } catch (err) {
+    const message =
+      err.response?.data?.message ||
+      err.response?.data?.detail ||
+      "Registration failed";
+
+    toast.error(message);
+
+    const apiErrors = err.response?.data?.errors;
+
+    if (apiErrors && Array.isArray(apiErrors)) {
+      const formattedErrors = {};
+      apiErrors.forEach((e) => {
+        const field = e.loc[e.loc.length - 1];
+        formattedErrors[field] = e.msg;
       });
-
-      localStorage.setItem("verifyEmail", form.email);
-
-      setPopup({
-        show: true,
-        message: "Check your email to verify account",
-      });
-    } catch (err) {
-      const apiErrors = err.response?.data?.errors;
-
-      if (apiErrors && Array.isArray(apiErrors)) {
-        const formattedErrors = {};
-        apiErrors.forEach((e) => {
-          const field = e.loc[e.loc.length - 1];
-          formattedErrors[field] = e.msg;
-        });
-        setErrors(formattedErrors);
-      } else {
-        setErrors({
-          general:
-            err.response?.data?.message ||
-            err.response?.data?.detail ||
-            "Registration failed",
-        });
-      }
-    } finally {
-      setLoading(false);
+      setErrors(formattedErrors);
     }
-  };
+
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <PageWrapper>
@@ -128,7 +131,9 @@ function Register() {
             value={form.email}
             onChange={handleChange}
           />
-          {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
+          {errors.email && (
+            <p className="text-red-500 text-sm">{errors.email}</p>
+          )}
 
           <div className="relative">
             <input
@@ -147,7 +152,9 @@ function Register() {
               {showPassword ? <FaEyeSlash /> : <FaEye />}
             </button>
           </div>
-          {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
+          {errors.password && (
+            <p className="text-red-500 text-sm">{errors.password}</p>
+          )}
 
           <div className="relative">
             <input
@@ -173,7 +180,9 @@ function Register() {
           <button
             disabled={loading}
             className={`w-full py-2 rounded transition cursor-pointer text-white ${
-              loading ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+              loading
+                ? "bg-blue-400 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700"
             }`}
           >
             {loading ? (
@@ -185,6 +194,15 @@ function Register() {
               "Register"
             )}
           </button>
+          <p className="text-sm text-center text-gray-600">
+            Already have an account?{" "}
+            <span
+              onClick={() => navigate("/login")}
+              className="text-blue-600 cursor-pointer hover:underline font-medium"
+            >
+              Login
+            </span>
+          </p>
 
           {errors.general && (
             <p className="text-red-500 text-sm text-center">{errors.general}</p>
@@ -192,7 +210,7 @@ function Register() {
         </form>
       </div>
 
-      {popup.show && (
+      {/* {popup.show && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
           <div className="bg-white p-6 rounded-xl shadow-lg w-80 text-center">
             <h3 className="text-lg font-semibold mb-4">Notification</h3>
@@ -208,7 +226,7 @@ function Register() {
             </button>
           </div>
         </div>
-      )}
+      )} */}
     </PageWrapper>
   );
 }

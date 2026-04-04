@@ -40,9 +40,10 @@ const Field = ({
     <label className="text-[13px] font-semibold text-slate-600">{label}</label>
 
     <div
-      className={`flex items-center gap-3 rounded-[14px] border px-5 py-4 text-base  ${
-        disabled ? "bg-slate-100 border-slate-300" : "bg-white border-slate-400"
-      }`}
+      className={`flex items-center gap-3 px-5 py-4 rounded-xl 
+  bg-slate-50 focus-within:ring-2 focus-within:ring-indigo-400
+  ${disabled && "opacity-60 cursor-not-allowed"}
+`}
     >
       {icon && <div className="text-slate-500">{icon}</div>}
 
@@ -70,9 +71,10 @@ const SelectField = ({
     <label className="text-[13px] font-semibold text-slate-600">{label}</label>
 
     <div
-      className={`flex items-center gap-3 rounded-[14px] border px-4 py-3 ${
-        disabled ? "bg-slate-100 border-slate-300" : "bg-white border-slate-400"
-      }`}
+      className={`flex items-center gap-3 px-4 py-3 rounded-xl 
+  bg-slate-50 focus-within:ring-2 focus-within:ring-indigo-400
+  ${disabled && "opacity-60"}
+`}
     >
       {icon && <div className="text-slate-500">{icon}</div>}
 
@@ -99,7 +101,7 @@ const ToggleRow = ({
   onChange,
   disabled = false,
 }) => (
-  <div className="flex items-center justify-between rounded-[14px] border border-slate-400 bg-white px-4 py-4">
+  <div className="flex items-center justify-between  bg-slate-50 rounded-xl shadow-sm px-4 py-4">
     <div>
       <p className="text-sm font-semibold text-slate-800">{label}</p>
       {description && (
@@ -112,7 +114,7 @@ const ToggleRow = ({
       onClick={onChange}
       disabled={disabled}
       className={`relative h-7 w-12 rounded-full ${
-        checked ? "bg-[#5848F6]" : "bg-slate-300"
+        checked ? "bg-indigo-500 hover:bg-indigo-600 shadow" : "bg-slate-300"
       } ${disabled && "opacity-50 cursor-not-allowed"}`}
     >
       <span
@@ -123,10 +125,9 @@ const ToggleRow = ({
     </button>
   </div>
 );
-
 const PageCard = ({ children, className = "" }) => (
   <div
-    className={`rounded-\[18px] border border-slate-500 bg-white px-5 py-5 ${className}`}
+    className={`rounded-3xl bg-white px-6 py-6 shadow-md hover:shadow-xl transition-all duration-300 ${className}`}
   >
     {children}
   </div>
@@ -137,7 +138,7 @@ const SaveButton = ({ onClick, saving, text }) => (
     <button
       onClick={onClick}
       disabled={saving}
-      className="rounded-[10px] bg-[#5848F6] px-6 py-3 text-base font-semibold text-white transition hover:bg-[#4737e8] disabled:cursor-not-allowed disabled:opacity-60"
+      className="rounded-[10px] bg-indigo-500 hover:bg-indigo-600 shadow px-6 py-3 text-base font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-60"
     >
       {saving ? "Saving..." : text}
     </button>
@@ -166,7 +167,7 @@ const BudgetPanel = ({
     : "bg-red-100 text-red-700 border border-red-300 cursor-pointer hover:bg-red-200";
 
   return (
-    <div className="rounded-\[14px] border border-slate-300 bg-white p-4 min-h-35">
+    <div className="bg-white rounded-2xl shadow p-4 min-h-35">
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <p className="text-[13px] font-semibold text-slate-600">{title}</p>
@@ -183,7 +184,7 @@ const BudgetPanel = ({
           </button>
           <button
             onClick={onAdd}
-            className="flex items-center justify-center w-5 h-5 rounded-full border border-slate-400 text-slate-500 hover:border-[#5848F6] hover:text-[#5848F6] transition"
+            className="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -248,7 +249,7 @@ const Settings = () => {
     email: "",
     phone_number: "",
     password: "",
-    default_currency: "USD",
+    currency: "INR",
     monthly_budget: "",
     email_notifications: true,
     push_notifications: false,
@@ -309,7 +310,7 @@ const Settings = () => {
         email: data.email || "",
         phone_number: data.phone_number || "",
         password: "",
-        default_currency: data.default_currency || "USD",
+        currency: data.currency || "INR",
         monthly_budget:
           data.monthly_budget === null || data.monthly_budget === undefined
             ? ""
@@ -346,7 +347,7 @@ const Settings = () => {
   const saveCurrency = async () => {
     try {
       setSaving(true);
-      await updateMySettings({ default_currency: settings.default_currency });
+      await updateMySettings({ currency: settings.currency });
       alert("Currency updated ✅");
     } catch (error) {
       console.error(error);
@@ -398,7 +399,8 @@ const Settings = () => {
 
   return (
     // ✅ FIX: Single root wrapper — all content including modals lives inside here
-    <div className="min-h-screen bg-\[#F5F6FA]  ">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-indigo-50 to-white">
+      {" "}
       {/* Top strip */}
       {/* <div className="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-3">
         <h1 className="text-\[15px] font-semibold text-slate-700">Settings</h1>
@@ -407,8 +409,7 @@ const Settings = () => {
           <UserCircle2 size={22} />
         </div>
       </div> */}
-
-      <div className="w-full px-10 py-6">
+      <div className="w-full px-3 sm:px-6 md:px-10 py-4 sm:py-6">
         <div className="w-full max-w-7xl mx-auto space-y-6">
           {" "}
           {/* Intro Card */}
@@ -422,15 +423,15 @@ const Settings = () => {
           </PageCard>
           {/* Tab Card */}
           <PageCard className="px-3 py-2 ">
-            <div className="flex flex-wrap gap-3">
+            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`rounded-[10px] px-5 py-3 text-sm font-semibold transition ${
+                  className={`whitespace-nowrap rounded-[10px] px-3 sm:px-5 py-2 sm:py-3 text-xs sm:text-sm font-semibold transition flex-shrink-0 ${
                     activeTab === tab.id
-                      ? "bg-[#5848F6] text-white"
-                      : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                      ? "bg-indigo-500 text-white shadow-md"
+                      : "bg-white/70 shadow-sm text-slate-700 hover:bg-slate-200"
                   }`}
                 >
                   {tab.label}
@@ -439,7 +440,7 @@ const Settings = () => {
             </div>
           </PageCard>
           {/* Main Content Card */}
-          <PageCard className="px-8 py-8">
+          <PageCard className="px-3 sm:px-8 py-4 sm:py-8">
             {" "}
             {loading ? (
               <div className="py-10 text-sm text-slate-500">
@@ -507,15 +508,15 @@ const Settings = () => {
                     <h3 className="text-\[28px] font-semibold text-slate-800">
                       Default Currency
                     </h3>
-                    <div className="max-w-2xl">
+                    <div className="max-w-2xl bg-slate-50 rounded-xl px-4 py-3">
                       <SelectField
                         label="Choose Currency"
-                        value={settings.default_currency}
+                        value={settings.currency}
                         disabled={!isEditing}
                         onChange={(e) =>
                           setSettings((prev) => ({
                             ...prev,
-                            default_currency: e.target.value,
+                            currency: e.target.value,
                           }))
                         }
                         options={currencies}
@@ -677,12 +678,10 @@ const Settings = () => {
           </PageCard>
         </div>
       </div>
-
       {/* ✅ FIX: All modals placed INSIDE the root wrapper div */}
-
       {/* Edit Budget Modal */}
       {showEditBudgetForm && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-xl w-96 space-y-4">
             <h3 className="text-lg font-semibold text-slate-800">
               Edit Budget
@@ -715,12 +714,14 @@ const Settings = () => {
                 onClick={async () => {
                   await API.patch(`/categories/${selectedBudget.id}`, {
                     name: editBudget.name,
+                    amount: Number(editBudget.amount),
+
                     type: selectedBudget.type,
                   });
                   setShowEditBudgetForm(false);
                   fetchCategories();
                 }}
-                className="px-4 py-2 rounded-lg bg-[#5848F6] text-white text-sm font-semibold"
+                className="px-4 py-2 rounded-lg bg-indigo-500 hover:bg-indigo-600 shadow text-white text-sm font-semibold"
               >
                 Save
               </button>
@@ -728,7 +729,6 @@ const Settings = () => {
           </div>
         </div>
       )}
-
       {/* Add Budget Modal */}
       {showBudgetForm && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
@@ -779,7 +779,7 @@ const Settings = () => {
                   setNewBudget({ name: "", amount: "" });
                   fetchCategories();
                 }}
-                className="px-4 py-2 rounded-lg bg-[#5848F6] text-white text-sm font-semibold hover:bg-[#4737e8]"
+                className="px-4 py-2 rounded-lg bg-indigo-500 hover:bg-indigo-600 shadow text-white text-sm font-semibold"
               >
                 Save
               </button>
@@ -787,7 +787,6 @@ const Settings = () => {
           </div>
         </div>
       )}
-
       {/* Delete Confirm Modal */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">

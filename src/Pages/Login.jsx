@@ -6,6 +6,7 @@ import Loader from "../Loader";
 import { GoogleLogin } from "@react-oauth/google";
 import API from "../api/apiClient";
 import { loginUser } from "../api/jwt";
+import { toast } from "react-toastify";
 
 const parseJwt = (token) => {
   try {
@@ -63,14 +64,19 @@ function Login() {
       localStorage.setItem("access_token", res.data.access_token);
       localStorage.setItem("refresh_token", res.data.refresh_token);
 
-      handleRedirectByRole(res.data.access_token);
+      toast.success("Login successful 🎉");
+
+      setTimeout(() => {
+        handleRedirectByRole(res.data.access_token);
+      }, 1000);
     } catch (err) {
-      setErrors({
-        general:
-          err.response?.data?.message ||
-          err.response?.data?.detail ||
-          "Login failed",
-      });
+      const message =
+        err.response?.data?.message ||
+        err.response?.data?.detail ||
+        "Login failed";
+
+      setErrors({ general: message }); // optional
+      toast.error(message); // ✅ correct place
     } finally {
       setLoading(false);
     }
@@ -84,10 +90,23 @@ function Login() {
       localStorage.setItem("access_token", res.data.access_token);
       localStorage.setItem("refresh_token", res.data.refresh_token);
 
-      handleRedirectByRole(res.data.access_token);
+      toast.success("Google login successful 🚀");
+
+      setTimeout(() => {
+        handleRedirectByRole(res.data.access_token);
+      }, 1000);
     } catch (err) {
       console.error("Google Login Error", err);
-      setErrors({ general: "Google login failed" });
+
+      const message =
+        err.response?.data?.message ||
+        err.response?.data?.detail ||
+        "Google login failed";
+
+      toast.error(message); // ✅ correct
+
+      // optional (remove if not needed)
+      setErrors({ general: message });
     }
   };
 
@@ -105,7 +124,9 @@ function Login() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-gray-700 mb-2 font-medium">Email</label>
+              <label className="block text-gray-700 mb-2 font-medium">
+                Email
+              </label>
               <input
                 type="email"
                 placeholder="Enter your email"
@@ -114,11 +135,15 @@ function Login() {
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={loading}
               />
-              {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+              {errors.email && (
+                <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+              )}
             </div>
 
             <div>
-              <label className="block text-gray-700 mb-2 font-medium">Password</label>
+              <label className="block text-gray-700 mb-2 font-medium">
+                Password
+              </label>
 
               <div className="relative">
                 <input
@@ -140,7 +165,9 @@ function Login() {
                 </button>
               </div>
 
-              {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
+              {errors.password && (
+                <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+              )}
             </div>
 
             <div className="flex justify-end text-sm">
@@ -167,7 +194,9 @@ function Login() {
             </button>
 
             {errors.general && (
-              <p className="text-red-500 text-sm text-center mt-2">{errors.general}</p>
+              <p className="text-red-500 text-sm text-center mt-2">
+                {errors.general}
+              </p>
             )}
 
             <div className="text-center text-gray-500 my-4">OR</div>
