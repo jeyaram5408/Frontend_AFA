@@ -1,12 +1,12 @@
 import API from "./apiClient";
 
 export const getGoals = async () => {
-  const res = await API.get("/goals");
+  const res = await API.get("/goals/");
   return res.data;
 };
 
 export const createGoal = async (payload) => {
-  const res = await API.post("/goals", payload);
+  const res = await API.post("/goals/", payload);
   return res.data;
 };
 
