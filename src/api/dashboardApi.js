@@ -2,8 +2,8 @@ import API from "./apiClient";
 
 export const getDashboardData = async () => {
   const [dashboardRes, healthRes] = await Promise.all([
-    API.get("/dashboard"),
-    API.get("/financial-health"),
+    API.get("/dashboard/"),
+    API.get("/financial-health/"),
   ]);
 
   const dashboard = dashboardRes.data || {};
