@@ -28,6 +28,7 @@ const Transactions = () => {
   const [selectedIds, setSelectedIds] = useState([]);
   const [showForm, setShowForm] = useState(false);
 
+  const [showTypeSelector, setShowTypeSelector] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [isDeleteMode, setIsDeleteMode] = useState(false);
 
@@ -338,42 +339,50 @@ const Transactions = () => {
           <h3 className="text-xl font-semibold">Last 7 Days Transactions</h3>
 
           <div className="flex gap-3">
-            {!isDeleteMode ? (
-              <button
-                onClick={() => setIsDeleteMode(true)}
-                className="bg-white text-white w-16 h-15 px-4 py-2 rounded-lg hover:bg-gray-100 transition flex items-center justify-center"
-              >
-                <img src={delete_icon} alt="Delete" />
-              </button>
-            ) : (
-              <>
+            {last7DaysTransactions.length > 0 &&
+              (!isDeleteMode ? (
                 <button
-                  onClick={() => {
-                    setIsDeleteMode(false);
-                    setSelectedIds([]);
-                  }}
-                  className="bg-gray-400 text-white px-4 py-2 rounded-lg"
+                  onClick={() => setIsDeleteMode(true)}
+                  className="bg-white text-white w-16 h-15 px-4 py-2 rounded-lg hover:bg-gray-100 transition flex items-center justify-center"
                 >
-                  Cancel
+                  <img src={delete_icon} alt="Delete" />
                 </button>
+              ) : (
+                <>
+                  <button
+                    onClick={() => {
+                      setIsDeleteMode(false);
+                      setSelectedIds([]);
+                    }}
+                    className="bg-gray-400 text-white px-4 py-2 rounded-lg"
+                  >
+                    Cancel
+                  </button>
 
-                <button
-                  disabled={selectedIds.length === 0}
-                  onClick={() => setShowConfirm(true)}
-                  className={`px-4 py-2 rounded-lg text-white ${
-                    selectedIds.length === 0 ? "bg-gray-300" : "bg-red-600"
-                  }`}
-                >
-                  Confirm Delete ({selectedIds.length})
-                </button>
-              </>
-            )}
+                  <button
+                    disabled={selectedIds.length === 0}
+                    onClick={() => setShowConfirm(true)}
+                    className={`px-4 py-2 rounded-lg text-white ${
+                      selectedIds.length === 0 ? "bg-gray-300" : "bg-red-600"
+                    }`}
+                  >
+                    Confirm Delete ({selectedIds.length})
+                  </button>
+                </>
+              ))}
           </div>
         </div>
 
         {last7DaysTransactions.length === 0 ? (
-          <div className="flex justify-center items-center h-full">
+          <div className="flex flex-col justify-center items-center h-full gap-4">
             <p className="text-gray-500 text-lg font-medium">No Transactions</p>
+
+            <button
+              onClick={() => setShowTypeSelector(true)}
+              className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition"
+            >
+              + Add Transaction
+            </button>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4  gap-4 items-stretch">
@@ -505,6 +514,47 @@ const Transactions = () => {
                 Save
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      {/* TYPE SELECTOR MODAL */}
+      {showTypeSelector && (
+        <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-xl w-80 text-center">
+            <h2 className="text-lg font-semibold mb-4">
+              Select Transaction Type
+            </h2>
+
+            <div className="flex gap-4 justify-center">
+              <button
+                onClick={() => {
+                  setType("income");
+                  setShowTypeSelector(false);
+                  setShowForm(true);
+                }}
+                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+              >
+                Income
+              </button>
+
+              <button
+                onClick={() => {
+                  setType("expense");
+                  setShowTypeSelector(false);
+                  setShowForm(true);
+                }}
+                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
+              >
+                Expense
+              </button>
+            </div>
+
+            <button
+              onClick={() => setShowTypeSelector(false)}
+              className="mt-4 text-sm text-gray-500 hover:underline"
+            >
+              Cancel
+            </button>
           </div>
         </div>
       )}

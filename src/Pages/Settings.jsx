@@ -8,8 +8,8 @@ import {
   Smartphone,
   BadgeDollarSign,
   Lock,
-  IndianRupee,
 } from "lucide-react";
+import { toast } from "react-toastify";
 
 const tabs = [
   { id: "alerts", label: "Alert / Notification Settings" },
@@ -180,7 +180,7 @@ const BudgetPanel = ({
                 : "text-slate-500 hover:text-slate-700"
             }`}
           >
-            {isEditing ? "Done" : "Edit"}
+            {isEditing ? "Done" : "Edit"}{" "}
           </button>
           <button
             onClick={onAdd}
@@ -219,8 +219,9 @@ const BudgetPanel = ({
               ${isEditing ? chipEditing : chipNormal}`}
           >
             <span>{b.name}</span>
-            <span className="opacity-60 text-\[11px]">₹{b.amount}</span>
-
+            {/* <span className="opacity-60 text-[11px]">
+              {b.amount ? `₹${b.amount}` : ""}
+            </span>{" "} */}
             {isEditing && (
               <button
                 onClick={(e) => {
@@ -258,11 +259,12 @@ const Settings = () => {
 
   // Replace existing budget-related states with these:
   const [budgets, setBudgets] = useState([]);
-
+  const [savingCategory, setSavingCategory] = useState(false);
   const [isEditingIncome, setIsEditingIncome] = useState(false);
   const [isEditingExpense, setIsEditingExpense] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-
+  const [isEditingAlerts, setIsEditingAlerts] = useState(false);
+  const [isEditingCurrency, setIsEditingCurrency] = useState(false);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [showBudgetForm, setShowBudgetForm] = useState(false);
   const [budgetFormType, setBudgetFormType] = useState("income"); // "income" | "expense"
   const [newBudget, setNewBudget] = useState({ name: "", amount: "" });
@@ -279,10 +281,11 @@ const Settings = () => {
     if (!deleteItem) return;
     try {
       await API.delete(`/categories/${deleteItem.id}`);
+      toast.success("Category deleted");
       setShowDeleteConfirm(false);
       fetchCategories();
     } catch (err) {
-      alert("Delete failed ❌");
+      toast.error("Delete failed");
     }
   };
 
@@ -291,7 +294,7 @@ const Settings = () => {
       const res = await API.get("/categories");
       setBudgets(res.data); // you can keep state name as budgets
     } catch (err) {
-      alert("Failed to load categories ❌");
+      toast.error("Failed to load categories");
     }
   };
 
@@ -321,7 +324,7 @@ const Settings = () => {
       });
     } catch (error) {
       console.error("Failed to fetch settings:", error);
-      alert("Failed to load settings");
+      toast.error("Failed to load settings");
     } finally {
       setLoading(false);
     }
@@ -335,10 +338,10 @@ const Settings = () => {
         push_notifications: settings.push_notifications,
         budget_alerts: settings.budget_alerts,
       });
-      alert("Alert settings updated ✅");
+      toast.success("Alert settings updated");
     } catch (error) {
       console.error(error);
-      alert(error?.response?.data?.detail || "Failed to update alerts");
+      toast.error(error?.response?.data?.detail || "Failed to update alerts");
     } finally {
       setSaving(false);
     }
@@ -348,10 +351,10 @@ const Settings = () => {
     try {
       setSaving(true);
       await updateMySettings({ currency: settings.currency });
-      alert("Currency updated ✅");
+      toast.success("Currency updated");
     } catch (error) {
       console.error(error);
-      alert(error?.response?.data?.detail || "Failed to update currency");
+      toast.error(error?.response?.data?.detail || "Failed to update currency");
     } finally {
       setSaving(false);
     }
@@ -366,10 +369,10 @@ const Settings = () => {
             ? null
             : Number(settings.monthly_budget),
       });
-      alert("Monthly budget updated ✅");
+      toast.success("Monthly budget updated");
     } catch (error) {
       console.error(error);
-      alert(error?.response?.data?.detail || "Failed to update budget");
+      toast.error(error?.response?.data?.detail || "Failed to update budget");
     } finally {
       setSaving(false);
     }
@@ -388,10 +391,10 @@ const Settings = () => {
       }
       await updateMySettings(payload);
       setSettings((prev) => ({ ...prev, password: "" }));
-      alert("Profile updated ✅");
+      toast.success("Profile updated");
     } catch (error) {
       console.error(error);
-      alert(error?.response?.data?.detail || "Failed to update profile");
+      toast.error(error?.response?.data?.detail || "Failed to update profile");
     } finally {
       setSaving(false);
     }
@@ -428,7 +431,7 @@ const Settings = () => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`whitespace-nowrap rounded-[10px] px-3 sm:px-5 py-2 sm:py-3 text-xs sm:text-sm font-semibold transition flex-shrink-0 ${
+                  className={`whitespace-nowrap rounded-[10px] px-3 sm:px-5 py-2 sm:py-3 text-xs sm:text-sm font-semibold transition shrink-0 ${
                     activeTab === tab.id
                       ? "bg-indigo-500 text-white shadow-md"
                       : "bg-white/70 shadow-sm text-slate-700 hover:bg-slate-200"
@@ -451,15 +454,24 @@ const Settings = () => {
                 {/* ── Alerts Tab ── */}
                 {activeTab === "alerts" && (
                   <div className="space-y-5">
-                    <h3 className="text-\[28px] font-semibold text-slate-800">
-                      Alert / Notification Settings
-                    </h3>
+                    <div className="flex justify-between items-center">
+                      <h3 className="text-[28px] font-semibold text-slate-800">
+                        Alert / Notification Settings
+                      </h3>
+
+                      <button
+                        onClick={() => setIsEditingAlerts((prev) => !prev)}
+                        className="text-sm font-semibold text-[#5848F6]"
+                      >
+                        {isEditingAlerts ? "Cancel" : "Edit"}
+                      </button>
+                    </div>
                     <div className="space-y-4">
                       <ToggleRow
                         label="Email Notifications"
                         description="Receive account and activity updates by email."
                         checked={settings.email_notifications}
-                        disabled={!isEditing}
+                        disabled={!isEditingAlerts}
                         onChange={() =>
                           setSettings((prev) => ({
                             ...prev,
@@ -471,7 +483,7 @@ const Settings = () => {
                         label="Push Notifications"
                         description="Get quick alerts directly inside the app."
                         checked={settings.push_notifications}
-                        disabled={!isEditing}
+                        disabled={!isEditingAlerts}
                         onChange={() =>
                           setSettings((prev) => ({
                             ...prev,
@@ -483,7 +495,7 @@ const Settings = () => {
                         label="Budget Alerts"
                         description="Notify when your monthly spending nears the limit."
                         checked={settings.budget_alerts}
-                        disabled={!isEditing}
+                        disabled={!isEditingAlerts}
                         onChange={() =>
                           setSettings((prev) => ({
                             ...prev,
@@ -492,7 +504,7 @@ const Settings = () => {
                         }
                       />
                     </div>
-                    {isEditing && (
+                    {isEditingAlerts && (
                       <SaveButton
                         onClick={saveAlerts}
                         saving={saving}
@@ -505,14 +517,23 @@ const Settings = () => {
                 {/* ── Currency Tab ── */}
                 {activeTab === "currency" && (
                   <div className="space-y-5">
-                    <h3 className="text-\[28px] font-semibold text-slate-800">
-                      Default Currency
-                    </h3>
+                    <div className="flex justify-between items-center">
+                      <h3 className="text-[28px] font-semibold text-slate-800">
+                        Default Currency
+                      </h3>
+
+                      <button
+                        onClick={() => setIsEditingCurrency((prev) => !prev)}
+                        className="text-sm font-semibold text-[#5848F6]"
+                      >
+                        {isEditingCurrency ? "Cancel" : "Edit"}
+                      </button>
+                    </div>
                     <div className="max-w-2xl bg-slate-50 rounded-xl px-4 py-3">
                       <SelectField
                         label="Choose Currency"
                         value={settings.currency}
-                        disabled={!isEditing}
+                        disabled={!isEditingCurrency}
                         onChange={(e) =>
                           setSettings((prev) => ({
                             ...prev,
@@ -523,11 +544,13 @@ const Settings = () => {
                         icon={<BadgeDollarSign size={18} />}
                       />
                     </div>
-                    <SaveButton
-                      onClick={saveCurrency}
-                      saving={saving}
-                      text="Save Currency"
-                    />
+                    {isEditingCurrency && (
+                      <SaveButton
+                        onClick={saveCurrency}
+                        saving={saving}
+                        text="Save Currency"
+                      />
+                    )}
                   </div>
                 )}
 
@@ -544,7 +567,7 @@ const Settings = () => {
                       <BudgetPanel
                         title="Income Budget"
                         type="income"
-                        budgets={budgets.filter((b) => b.type === "income")}
+                        budgets={budgets.filter((b) => b?.type === "income")}
                         isEditing={isEditingIncome}
                         onToggleEdit={() => setIsEditingIncome((prev) => !prev)}
                         onAdd={() => {
@@ -566,7 +589,7 @@ const Settings = () => {
                       <BudgetPanel
                         title="Expense Budget"
                         type="expense"
-                        budgets={budgets.filter((b) => b.type === "expense")}
+                        budgets={budgets.filter((b) => b?.type === "expense")} // ✅ FIX
                         isEditing={isEditingExpense}
                         onToggleEdit={() =>
                           setIsEditingExpense((prev) => !prev)
@@ -604,17 +627,17 @@ const Settings = () => {
                       </h3>
 
                       <button
-                        onClick={() => setIsEditing((prev) => !prev)}
+                        onClick={() => setIsEditingProfile((prev) => !prev)}
                         className="text-sm font-semibold text-[#5848F6]"
                       >
-                        {isEditing ? "Cancel" : "Edit"}
+                        {isEditingProfile ? "Cancel" : "Edit"}{" "}
                       </button>
                     </div>
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       <Field
                         label="Full Name"
                         value={settings.name}
-                        disabled={!isEditing}
+                        disabled={!isEditingProfile}
                         onChange={(e) =>
                           setSettings((prev) => ({
                             ...prev,
@@ -628,7 +651,7 @@ const Settings = () => {
                         label="Email"
                         type="email"
                         value={settings.email}
-                        disabled={!isEditing}
+                        disabled={!isEditingProfile}
                         onChange={(e) =>
                           setSettings((prev) => ({
                             ...prev,
@@ -641,7 +664,7 @@ const Settings = () => {
                       <Field
                         label="Phone Number"
                         value={settings.phone_number}
-                        disabled={!isEditing}
+                        disabled={!isEditingProfile}
                         onChange={(e) =>
                           setSettings((prev) => ({
                             ...prev,
@@ -655,7 +678,7 @@ const Settings = () => {
                         label="New Password"
                         type="password"
                         value={settings.password}
-                        disabled={!isEditing}
+                        disabled={!isEditingProfile}
                         onChange={(e) =>
                           setSettings((prev) => ({
                             ...prev,
@@ -694,7 +717,7 @@ const Settings = () => {
               className="w-full border p-2 rounded-lg"
               placeholder="Budget name"
             />
-            <input
+            {/* <input
               type="number"
               value={editBudget.amount}
               onChange={(e) =>
@@ -702,7 +725,7 @@ const Settings = () => {
               }
               className="w-full border p-2 rounded-lg"
               placeholder="Amount"
-            />
+            /> */}
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setShowEditBudgetForm(false)}
@@ -712,14 +735,23 @@ const Settings = () => {
               </button>
               <button
                 onClick={async () => {
-                  await API.patch(`/categories/${selectedBudget.id}`, {
-                    name: editBudget.name,
-                    amount: Number(editBudget.amount),
+                  try {
+                    if (!editBudget.name.trim()) {
+                      toast.error("Name is required");
+                      return;
+                    }
 
-                    type: selectedBudget.type,
-                  });
-                  setShowEditBudgetForm(false);
-                  fetchCategories();
+                    await API.patch(`/categories/${selectedBudget.id}`, {
+                      name: editBudget.name.trim(),
+                      type: selectedBudget.type,
+                    });
+
+                    toast.success("Category updated");
+                    setShowEditBudgetForm(false);
+                    fetchCategories();
+                  } catch (err) {
+                    toast.error(err?.response?.data?.detail || "Update failed");
+                  }
                 }}
                 className="px-4 py-2 rounded-lg bg-indigo-500 hover:bg-indigo-600 shadow text-white text-sm font-semibold"
               >
@@ -749,15 +781,6 @@ const Settings = () => {
               }
               className="w-full border border-slate-300 p-2.5 rounded-lg text-sm outline-none focus:border-[#5848F6]"
             />
-            {/* <input
-              type="number"
-              placeholder="Amount (₹)"
-              value={newBudget.amount}
-              onChange={(e) =>
-                setNewBudget({ ...newBudget, amount: e.target.value })
-              }
-              className="w-full border border-slate-300 p-2.5 rounded-lg text-sm outline-none focus:border-[#5848F6]"
-            /> */}
 
             <div className="flex justify-end gap-2 pt-1">
               <button
@@ -769,19 +792,50 @@ const Settings = () => {
               >
                 Cancel
               </button>
+
               <button
+                disabled={!newBudget.name.trim() || savingCategory}
                 onClick={async () => {
-                  await API.post("/categories", {
-                    name: newBudget.name,
-                    type: budgetFormType, // income / expense
-                  });
-                  setShowBudgetForm(false);
-                  setNewBudget({ name: "", amount: "" });
-                  fetchCategories();
+                  try {
+                    setSavingCategory(true); // ✅ START LOADING
+
+                    if (!newBudget.name.trim()) {
+                      toast.error("Name is required");
+                      return;
+                    }
+
+                    if (
+                      budgets.some(
+                        (b) =>
+                          b.name.toLowerCase() ===
+                          newBudget.name.trim().toLowerCase(),
+                      )
+                    ) {
+                      toast.error("Category already exists");
+                      return;
+                    }
+
+                    await API.post("/categories", {
+                      name: newBudget.name.trim(),
+                      type: budgetFormType,
+                    });
+
+                    toast.success("Category added");
+
+                    setShowBudgetForm(false);
+                    setNewBudget({ name: "", amount: "" });
+                    fetchCategories();
+                  } catch (err) {
+                    toast.error(
+                      err?.response?.data?.detail || "Failed to add category",
+                    );
+                  } finally {
+                    setSavingCategory(false); // ✅ STOP LOADING
+                  }
                 }}
-                className="px-4 py-2 rounded-lg bg-indigo-500 hover:bg-indigo-600 shadow text-white text-sm font-semibold"
+                className="px-4 py-2 rounded-lg bg-indigo-500 hover:bg-indigo-600 shadow text-white text-sm font-semibold disabled:opacity-60"
               >
-                Save
+                {savingCategory ? "Saving..." : "Save"} {/* ✅ TEXT CHANGE */}
               </button>
             </div>
           </div>
