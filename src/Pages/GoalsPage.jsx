@@ -340,7 +340,8 @@ const GoalsPage = () => {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 relative z-0">
+          {" "}
           {currentGoals.map((goal) => (
             <GoalCard
               key={goal.id}
@@ -596,9 +597,9 @@ function GoalCard({
   return (
     <div
       ref={menuRef}
-      className="bg-white/80 backdrop-blur-md p-5 rounded-2xl border border-gray-100 
+      className={`relative ${menuOpen ? "z-50" : "z-10"} bg-white/80 backdrop-blur-md p-5 rounded-2xl border border-gray-100 
   shadow-sm transition-all duration-300 
-  hover:scale-105 hover:-translate-y-2 hover:shadow-xl"
+  hover:scale-[1.02] hover:-translate-y-1 hover:shadow-xl`}
     >
       {" "}
       {/* Header */}
@@ -660,7 +661,8 @@ function GoalCard({
         </button>
 
         {menuOpen && (
-          <div className="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-lg z-10">
+          <div className="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-lg z-50">
+            {" "}
             {goal.status !== "completed" && goal.status !== "cancelled" && (
               <button
                 onClick={() => {
@@ -672,7 +674,6 @@ function GoalCard({
                 + Add Money
               </button>
             )}
-
             <button
               onClick={() => {
                 onViewHistory();
@@ -682,7 +683,6 @@ function GoalCard({
             >
               History
             </button>
-
             <button
               onClick={() => {
                 onEdit();
@@ -692,7 +692,6 @@ function GoalCard({
             >
               Edit
             </button>
-
             {goal.status !== "completed" && goal.status !== "cancelled" && (
               <button
                 onClick={() => {
@@ -704,7 +703,6 @@ function GoalCard({
                 Complete
               </button>
             )}
-
             <button
               onClick={() => {
                 onDelete();
