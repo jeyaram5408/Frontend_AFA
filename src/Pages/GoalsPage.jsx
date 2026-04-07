@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import {
   getGoals,
   createGoal,
@@ -8,7 +8,7 @@ import {
   getGoalContributions,
   completeGoal,
 } from "../api/goalApi";
-
+import { MoreVertical } from "lucide-react";
 const initialGoalForm = {
   name: "",
   target_amount: "",
@@ -37,7 +37,7 @@ const GoalsPage = () => {
   const [showGoalModal, setShowGoalModal] = useState(false);
   const [showContributionModal, setShowContributionModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
-
+  // const [menuOpen, setMenuOpen] = useState(false);
   const [selectedGoal, setSelectedGoal] = useState(null);
   const [goalForm, setGoalForm] = useState(initialGoalForm);
   const [contributionForm, setContributionForm] = useState(
@@ -189,6 +189,9 @@ const GoalsPage = () => {
   };
 
   const handleCompleteGoal = async (goalId) => {
+    const ok = window.confirm("Mark this goal as completed?");
+    if (!ok) return;
+
     try {
       await completeGoal(goalId);
       fetchGoals();
@@ -561,7 +564,19 @@ function GoalCard({
   onComplete,
 }) {
   const progress = Math.min(Number(goal.progress || 0), 100);
+  const menuRef = useRef();
+  const [menuOpen, setMenuOpen] = useState(false);
 
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
   const badgeClasses =
     goal.status === "completed"
       ? "bg-green-100 text-green-700"
@@ -580,9 +595,10 @@ function GoalCard({
 
   return (
     <div
+      ref={menuRef}
       className="bg-white/80 backdrop-blur-md p-5 rounded-2xl border border-gray-100 
-shadow-sm transition-all duration-300 
-hover:scale-105 hover:-translate-y-2 hover:shadow-xl"
+  shadow-sm transition-all duration-300 
+  hover:scale-105 hover:-translate-y-2 hover:shadow-xl"
     >
       {" "}
       {/* Header */}
@@ -632,49 +648,74 @@ hover:scale-105 hover:-translate-y-2 hover:shadow-xl"
         <InfoBox label="Duration" value={`${goal.duration_days || 0} days`} />
       </div>
       {/* Actions */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-2 mt-5">
-        {goal.status !== "completed" && goal.status !== "cancelled" ? (
-          <button
-            onClick={onAddMoney}
-            className="bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg text-sm font-medium"
-          >
-            + Add Money
-          </button>
-        ) : (
-          <div />
+      <div className="relative">
+        <button
+          onClick={(e) => {
+            e.stopPropagation(); //
+            setMenuOpen(!menuOpen);
+          }}
+          className="p-2 rounded-full hover:bg-gray-100"
+        >
+          <MoreVertical size={18} />
+        </button>
+
+        {menuOpen && (
+          <div className="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-lg z-10">
+            {goal.status !== "completed" && goal.status !== "cancelled" && (
+              <button
+                onClick={() => {
+                  onAddMoney();
+                  setMenuOpen(false);
+                }}
+                className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+              >
+                + Add Money
+              </button>
+            )}
+
+            <button
+              onClick={() => {
+                onViewHistory();
+                setMenuOpen(false);
+              }}
+              className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+            >
+              History
+            </button>
+
+            <button
+              onClick={() => {
+                onEdit();
+                setMenuOpen(false);
+              }}
+              className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+            >
+              Edit
+            </button>
+
+            {goal.status !== "completed" && goal.status !== "cancelled" && (
+              <button
+                onClick={() => {
+                  onComplete();
+                  setMenuOpen(false);
+                }}
+                className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm text-indigo-600"
+              >
+                Complete
+              </button>
+            )}
+
+            <button
+              onClick={() => {
+                onDelete();
+                setMenuOpen(false);
+              }}
+              className="block w-full text-left px-4 py-2 hover:bg-red-100 text-sm text-red-600"
+            >
+              Delete
+            </button>
+          </div>
         )}
-
-        <button
-          onClick={onViewHistory}
-          className="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 rounded-lg text-sm font-medium"
-        >
-          History
-        </button>
-
-        <button
-          onClick={onEdit}
-          className="bg-yellow-400 hover:bg-yellow-500 text-white py-2 rounded-lg text-sm font-medium"
-        >
-          Edit
-        </button>
-
-        {goal.status !== "completed" && goal.status !== "cancelled" ? (
-          <button
-            onClick={onComplete}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg text-sm font-medium"
-          >
-            Complete
-          </button>
-        ) : (
-          <div />
-        )}
-
-        <button
-          onClick={onDelete}
-          className="bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg text-sm font-medium"
-        >
-          Delete
-        </button>
       </div>
     </div>
   );
