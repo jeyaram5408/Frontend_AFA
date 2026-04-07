@@ -107,7 +107,7 @@ const Reports = () => {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="space-y-6 sm:space-y-12 max-w-screen mx-auto px-3 sm:px-6"
+      className="space-y-6 sm:space-y-12 max-w-screen mx-auto px-3 sm:px-6 pb-24"
     >
       {/* HEADER */}
       <div>
@@ -118,7 +118,7 @@ const Reports = () => {
       </div>
 
       {/* SUMMARY */}
-      <div className="grid grid-cols-3 gap-2 sm:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-6">
         <div className="bg-white p-3 sm:p-6 rounded-2xl sm:rounded-3xl shadow">
           <p className="text-xs sm:text-sm text-gray-500">Financial Score</p>
           <h3 className="text-xl sm:text-4xl font-bold text-indigo-600 mt-1 sm:mt-2">
