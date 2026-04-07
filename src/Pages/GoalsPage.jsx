@@ -567,6 +567,7 @@ function GoalCard({
   const progress = Math.min(Number(goal.progress || 0), 100);
   const menuRef = useRef();
   const [menuOpen, setMenuOpen] = useState(false);
+  const isActive = goal.status !== "completed" && goal.status !== "cancelled";
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -575,8 +576,9 @@ function GoalCard({
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("click", handleClickOutside);
+
+    return () => document.removeEventListener("click", handleClickOutside);
   }, []);
   const badgeClasses =
     goal.status === "completed"
@@ -626,7 +628,7 @@ function GoalCard({
               e.stopPropagation();
               setMenuOpen(!menuOpen);
             }}
-            className="p-2 rounded-full hover:bg-gray-100"
+            className="p-2.5 rounded-full hover:bg-gray-100 active:scale-95"
           >
             <MoreVertical size={18} />
           </button>
@@ -634,18 +636,18 @@ function GoalCard({
           {/* DROPDOWN MENU */}
 
           {menuOpen && (
-            <div className="absolute right-0 top-10 w-40 bg-white border rounded-lg shadow-lg z-50">
+            <div className="absolute right-0 top-10 w-40 bg-white border rounded-lg shadow-lg z-50 animate-in fade-in zoom-in-95 duration-100">
+              {" "}
               <button
                 onClick={() => {
                   onEdit();
                   setMenuOpen(false);
                 }}
-                className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm cursor-pointer"
               >
                 Edit
               </button>
-
-              {goal.status !== "completed" && goal.status !== "cancelled" && (
+              {isActive && (
                 <button
                   onClick={() => {
                     onComplete();
@@ -656,7 +658,6 @@ function GoalCard({
                   Complete
                 </button>
               )}
-
               <button
                 onClick={() => {
                   onDelete();
@@ -701,8 +702,8 @@ function GoalCard({
         <InfoBox label="Duration" value={`${goal.duration_days || 0} days`} />
       </div>
       {/* Actions */}
-      <div className="flex gap-2 mt-4">
-        {goal.status !== "completed" && goal.status !== "cancelled" && (
+      <div className="flex gap-1 mt-4">
+        {isActive && (
           <button
             onClick={onAddMoney}
             className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg text-sm font-medium"
