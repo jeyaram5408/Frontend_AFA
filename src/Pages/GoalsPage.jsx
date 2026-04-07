@@ -612,11 +612,63 @@ function GoalCard({
           </p>
         </div>
 
-        <span
-          className={`text-xs px-3 py-1 rounded-full font-medium capitalize ${badgeClasses}`}
-        >
-          {goal.status?.replace("_", " ")}
-        </span>
+        <div className="flex items-start gap-2 relative">
+          {/* STATUS */}
+          <span
+            className={`text-xs px-3 py-1 rounded-full font-medium capitalize ${badgeClasses}`}
+          >
+            {goal.status?.replace("_", " ")}
+          </span>
+
+          {/* 3 DOT BUTTON */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setMenuOpen(!menuOpen);
+            }}
+            className="p-2 rounded-full hover:bg-gray-100"
+          >
+            <MoreVertical size={18} />
+          </button>
+
+          {/* DROPDOWN MENU */}
+
+          {menuOpen && (
+            <div className="absolute right-0 top-10 w-40 bg-white border rounded-lg shadow-lg z-50">
+              <button
+                onClick={() => {
+                  onEdit();
+                  setMenuOpen(false);
+                }}
+                className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+              >
+                Edit
+              </button>
+
+              {goal.status !== "completed" && goal.status !== "cancelled" && (
+                <button
+                  onClick={() => {
+                    onComplete();
+                    setMenuOpen(false);
+                  }}
+                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm text-indigo-600"
+                >
+                  Complete
+                </button>
+              )}
+
+              <button
+                onClick={() => {
+                  onDelete();
+                  setMenuOpen(false);
+                }}
+                className="block w-full text-left px-4 py-2 hover:bg-red-100 text-sm text-red-600"
+              >
+                Delete
+              </button>
+            </div>
+          )}
+        </div>
       </div>
       {/* Progress */}
       <div className="mt-4">
@@ -649,71 +701,22 @@ function GoalCard({
         <InfoBox label="Duration" value={`${goal.duration_days || 0} days`} />
       </div>
       {/* Actions */}
-      <div className="relative">
-        <button
-          onClick={(e) => {
-            e.stopPropagation(); //
-            setMenuOpen(!menuOpen);
-          }}
-          className="p-2 rounded-full hover:bg-gray-100"
-        >
-          <MoreVertical size={18} />
-        </button>
-
-        {menuOpen && (
-          <div className="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-lg z-50">
-            {" "}
-            {goal.status !== "completed" && goal.status !== "cancelled" && (
-              <button
-                onClick={() => {
-                  onAddMoney();
-                  setMenuOpen(false);
-                }}
-                className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
-              >
-                + Add Money
-              </button>
-            )}
-            <button
-              onClick={() => {
-                onViewHistory();
-                setMenuOpen(false);
-              }}
-              className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
-            >
-              History
-            </button>
-            <button
-              onClick={() => {
-                onEdit();
-                setMenuOpen(false);
-              }}
-              className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
-            >
-              Edit
-            </button>
-            {goal.status !== "completed" && goal.status !== "cancelled" && (
-              <button
-                onClick={() => {
-                  onComplete();
-                  setMenuOpen(false);
-                }}
-                className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm text-indigo-600"
-              >
-                Complete
-              </button>
-            )}
-            <button
-              onClick={() => {
-                onDelete();
-                setMenuOpen(false);
-              }}
-              className="block w-full text-left px-4 py-2 hover:bg-red-100 text-sm text-red-600"
-            >
-              Delete
-            </button>
-          </div>
+      <div className="flex gap-2 mt-4">
+        {goal.status !== "completed" && goal.status !== "cancelled" && (
+          <button
+            onClick={onAddMoney}
+            className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg text-sm font-medium"
+          >
+            + Add Money
+          </button>
         )}
+
+        <button
+          onClick={onViewHistory}
+          className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 rounded-lg text-sm font-medium"
+        >
+          History
+        </button>
       </div>
     </div>
   );
