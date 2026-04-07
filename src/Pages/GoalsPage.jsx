@@ -643,7 +643,7 @@ function GoalCard({
                   onEdit();
                   setMenuOpen(false);
                 }}
-                className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm cursor-pointer"
+                className="block w-full text-left rounded-t-lg px-4 py-2 hover:bg-gray-100 text-sm cursor-pointer"
               >
                 Edit
               </button>
@@ -663,7 +663,7 @@ function GoalCard({
                   onDelete();
                   setMenuOpen(false);
                 }}
-                className="block w-full text-left px-4 py-2 hover:bg-red-100 text-sm text-red-600"
+                className="block w-full text-left rounded-b-lg px-4 py-2 hover:bg-red-100 text-sm text-red-600"
               >
                 Delete
               </button>
