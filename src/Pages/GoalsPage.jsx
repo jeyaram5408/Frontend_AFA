@@ -653,7 +653,7 @@ function GoalCard({
                     onComplete();
                     setMenuOpen(false);
                   }}
-                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm text-indigo-600"
+                  className="block w-full text-left px-4 py-2 hover:bg-blue-200 text-sm text-indigo-600"
                 >
                   Complete
                 </button>
