@@ -25,8 +25,8 @@ export const getAdminAISuggestions = () => API.get("/admin/ai-suggestions");
 
 export const getAdminAnalytics = () => API.get("/admin/analytics");
 
-export const getAdminLogs = () => API.get("/admin/logs");
-
+export const getAdminLogs = (limit = 50) => 
+  API.get("/admin/logs", { params: { limit } });
 export const uploadAdminMedia = (formData) =>
   API.post("/admin/media/upload", formData, {
     headers: { "Content-Type": "multipart/form-data" },

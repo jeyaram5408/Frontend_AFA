@@ -75,7 +75,11 @@ const Dashboard = ({ transactions, setTransactions }) => {
     };
     fetchUserInfo();
   }, []);
-
+  useEffect(() => {
+    if (user?.role === "admin") {
+      navigate("/admin");
+    }
+  }, [user]);
   useEffect(() => {
     fetchDashboard();
   }, []);

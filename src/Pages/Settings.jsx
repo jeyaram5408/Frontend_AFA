@@ -1,21 +1,22 @@
 import React, { useEffect, useState } from "react";
 import API from "../api/apiClient";
 import { getMySettings, updateMySettings } from "../api/settingsApi";
+
 import {
-  Bell,
   UserCircle2,
   Mail,
   Smartphone,
   BadgeDollarSign,
   Lock,
 } from "lucide-react";
+
 import { toast } from "react-toastify";
 
 const tabs = [
-  { id: "alerts", label: "Alert / Notification Settings" },
-  { id: "currency", label: "Default Currency" },
-  { id: "budget", label: "Budget Category Settings" },
-  { id: "profile", label: "Profile / Account Settings" },
+  { id: "alerts", label: "Alerts", fullLabel: "Alert / Notification Settings" },
+  { id: "currency", label: "Currency", fullLabel: "Default Currency" },
+  { id: "budget", label: "Budget", fullLabel: "Budget Category Settings" },
+  { id: "profile", label: "Profile", fullLabel: "Profile / Account Settings" },
 ];
 
 const currencies = [
@@ -27,6 +28,30 @@ const currencies = [
   { value: "AED", label: "AED - UAE Dirham" },
 ];
 
+/* -------------------------------------------------------------------------- */
+/*                                  COMPONENTS                                */
+/* -------------------------------------------------------------------------- */
+
+const PageCard = ({ children, className = "" }) => (
+  <div
+    className={`rounded-2xl sm:rounded-3xl bg-white shadow-sm sm:shadow-md hover:shadow-lg transition-all duration-300 ${className}`}
+  >
+    {children}
+  </div>
+);
+
+const SaveButton = ({ onClick, saving, text }) => (
+  <div className="flex justify-end pt-2">
+    <button
+      onClick={onClick}
+      disabled={saving}
+      className="w-full sm:w-auto rounded-xl bg-indigo-500 hover:bg-indigo-600 px-6 py-3 text-sm sm:text-base font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-60"
+    >
+      {saving ? "Saving..." : text}
+    </button>
+  </div>
+);
+
 const Field = ({
   label,
   value,
@@ -37,15 +62,16 @@ const Field = ({
   disabled = false,
 }) => (
   <div className="space-y-2">
-    <label className="text-[13px] font-semibold text-slate-600">{label}</label>
+    <label className="text-xs sm:text-sm font-semibold text-slate-600">
+      {label}
+    </label>
 
     <div
-      className={`flex items-center gap-3 px-5 py-4 rounded-xl 
-  bg-slate-50 focus-within:ring-2 focus-within:ring-indigo-400
-  ${disabled && "opacity-60 cursor-not-allowed"}
-`}
+      className={`flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-50 focus-within:ring-2 focus-within:ring-indigo-400 transition ${
+        disabled ? "opacity-60 cursor-not-allowed" : ""
+      }`}
     >
-      {icon && <div className="text-slate-500">{icon}</div>}
+      {icon && <div className="text-slate-500 shrink-0">{icon}</div>}
 
       <input
         type={type}
@@ -68,15 +94,16 @@ const SelectField = ({
   disabled = false,
 }) => (
   <div className="space-y-2">
-    <label className="text-[13px] font-semibold text-slate-600">{label}</label>
+    <label className="text-xs sm:text-sm font-semibold text-slate-600">
+      {label}
+    </label>
 
     <div
-      className={`flex items-center gap-3 px-4 py-3 rounded-xl 
-  bg-slate-50 focus-within:ring-2 focus-within:ring-indigo-400
-  ${disabled && "opacity-60"}
-`}
+      className={`flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-50 focus-within:ring-2 focus-within:ring-indigo-400 transition ${
+        disabled ? "opacity-60" : ""
+      }`}
     >
-      {icon && <div className="text-slate-500">{icon}</div>}
+      {icon && <div className="text-slate-500 shrink-0">{icon}</div>}
 
       <select
         value={value}
@@ -101,11 +128,14 @@ const ToggleRow = ({
   onChange,
   disabled = false,
 }) => (
-  <div className="flex items-center justify-between  bg-slate-50 rounded-xl shadow-sm px-4 py-4">
-    <div>
+  <div className="flex items-center justify-between gap-3 bg-slate-50 rounded-xl px-3 sm:px-4 py-4">
+    <div className="flex-1">
       <p className="text-sm font-semibold text-slate-800">{label}</p>
+
       {description && (
-        <p className="mt-1 text-xs text-slate-500">{description}</p>
+        <p className="mt-1 text-xs text-slate-500 leading-relaxed">
+          {description}
+        </p>
       )}
     </div>
 
@@ -113,34 +143,15 @@ const ToggleRow = ({
       type="button"
       onClick={onChange}
       disabled={disabled}
-      className={`relative h-7 w-12 rounded-full ${
-        checked ? "bg-indigo-500 hover:bg-indigo-600 shadow" : "bg-slate-300"
-      } ${disabled && "opacity-50 cursor-not-allowed"}`}
+      className={`relative h-7 w-12 rounded-full transition shrink-0 ${
+        checked ? "bg-indigo-500 hover:bg-indigo-600" : "bg-slate-300"
+      } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
     >
       <span
-        className={`absolute top-1 h-5 w-5 rounded-full bg-white ${
+        className={`absolute top-1 h-5 w-5 rounded-full bg-white transition-all ${
           checked ? "left-6" : "left-1"
         }`}
       />
-    </button>
-  </div>
-);
-const PageCard = ({ children, className = "" }) => (
-  <div
-    className={`rounded-3xl bg-white px-6 py-6 shadow-md hover:shadow-xl transition-all duration-300 ${className}`}
-  >
-    {children}
-  </div>
-);
-
-const SaveButton = ({ onClick, saving, text }) => (
-  <div className="flex justify-end pt-2">
-    <button
-      onClick={onClick}
-      disabled={saving}
-      className="rounded-[10px] bg-indigo-500 hover:bg-indigo-600 shadow px-6 py-3 text-base font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-60"
-    >
-      {saving ? "Saving..." : text}
     </button>
   </div>
 );
@@ -157,7 +168,6 @@ const BudgetPanel = ({
 }) => {
   const isIncome = type === "income";
 
-  // Green for income, Red/Pink for expense (matching categories screenshot)
   const chipNormal = isIncome
     ? "bg-[#eef6ee] text-green-700 border border-green-200"
     : "bg-[#fef0f0] text-red-600 border border-red-200";
@@ -167,61 +177,48 @@ const BudgetPanel = ({
     : "bg-red-100 text-red-700 border border-red-300 cursor-pointer hover:bg-red-200";
 
   return (
-    <div className="bg-white rounded-2xl shadow p-4 min-h-35">
-      {/* Header */}
+    <div className="bg-white rounded-2xl shadow p-4 min-h-[140px]">
       <div className="flex items-center justify-between mb-3">
         <p className="text-[13px] font-semibold text-slate-600">{title}</p>
+
         <div className="flex items-center gap-2">
           <button
             onClick={onToggleEdit}
             className={`text-[13px] font-semibold transition ${
               isEditing
-                ? "text-[#5848F6]"
+                ? "text-indigo-600"
                 : "text-slate-500 hover:text-slate-700"
             }`}
           >
-            {isEditing ? "Done" : "Edit"}{" "}
+            {isEditing ? "Done" : "Edit"}
           </button>
+
           <button
             onClick={onAdd}
             className="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="12"
-              height="12"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
+            +
           </button>
         </div>
       </div>
 
-      {/* Chips */}
       <div className="flex flex-wrap gap-2 min-h-10">
         {budgets.length === 0 && (
           <p className="text-xs text-slate-400 italic">
             No {title.toLowerCase()} added yet.
           </p>
         )}
+
         {budgets.map((b) => (
           <div
             key={b.id}
             onClick={() => isEditing && onEditChip(b)}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[13px] font-medium transition select-none
-              ${isEditing ? chipEditing : chipNormal}`}
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[13px] font-medium transition select-none ${
+              isEditing ? chipEditing : chipNormal
+            }`}
           >
             <span>{b.name}</span>
-            {/* <span className="opacity-60 text-[11px]">
-              {b.amount ? `₹${b.amount}` : ""}
-            </span>{" "} */}
+
             {isEditing && (
               <button
                 onClick={(e) => {
@@ -240,10 +237,18 @@ const BudgetPanel = ({
   );
 };
 
+/* -------------------------------------------------------------------------- */
+/*                                   SETTINGS                                 */
+/* -------------------------------------------------------------------------- */
+
 const Settings = () => {
   const [activeTab, setActiveTab] = useState("alerts");
+
   const [loading, setLoading] = useState(true);
+
   const [saving, setSaving] = useState(false);
+
+  const [savingCategory, setSavingCategory] = useState(false);
 
   const [settings, setSettings] = useState({
     name: "",
@@ -257,44 +262,63 @@ const Settings = () => {
     budget_alerts: true,
   });
 
-  // Replace existing budget-related states with these:
   const [budgets, setBudgets] = useState([]);
-  const [savingCategory, setSavingCategory] = useState(false);
+
   const [isEditingIncome, setIsEditingIncome] = useState(false);
+
   const [isEditingExpense, setIsEditingExpense] = useState(false);
+
   const [isEditingAlerts, setIsEditingAlerts] = useState(false);
+
   const [isEditingCurrency, setIsEditingCurrency] = useState(false);
+
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+
   const [showBudgetForm, setShowBudgetForm] = useState(false);
-  const [budgetFormType, setBudgetFormType] = useState("income"); // "income" | "expense"
-  const [newBudget, setNewBudget] = useState({ name: "", amount: "" });
 
-  const [showEditBudgetForm, setShowEditBudgetForm] = useState(false);
-  const [selectedBudget, setSelectedBudget] = useState(null);
-  const [editBudget, setEditBudget] = useState({ name: "", amount: "" });
+  const [budgetFormType, setBudgetFormType] = useState("income");
 
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [deleteItem, setDeleteItem] = useState(null);
+  const [newBudget, setNewBudget] = useState({
+    name: "",
+    amount: "",
+  });
 
-  // ✅ FIX: moved confirmDelete AFTER state declarations
-  const confirmDelete = async () => {
-    if (!deleteItem) return;
-    try {
-      await API.delete(`/categories/${deleteItem.id}`);
-      toast.success("Category deleted");
-      setShowDeleteConfirm(false);
-      fetchCategories();
-    } catch (err) {
-      toast.error("Delete failed");
-    }
-  };
+  /* -------------------------------------------------------------------------- */
+  /*                                   API                                      */
+  /* -------------------------------------------------------------------------- */
 
   const fetchCategories = async () => {
     try {
       const res = await API.get("/categories");
-      setBudgets(res.data); // you can keep state name as budgets
-    } catch (err) {
+      setBudgets(res.data);
+    } catch {
       toast.error("Failed to load categories");
+    }
+  };
+
+  const fetchSettings = async () => {
+    try {
+      setLoading(true);
+
+      const res = await getMySettings();
+
+      const data = res.data.data;
+
+      setSettings({
+        name: data.name || "",
+        email: data.email || "",
+        phone_number: data.phone_number || "",
+        password: "",
+        currency: data.currency || "INR",
+        monthly_budget: data.monthly_budget || "",
+        email_notifications: data.email_notifications ?? true,
+        push_notifications: data.push_notifications ?? false,
+        budget_alerts: data.budget_alerts ?? true,
+      });
+    } catch {
+      toast.error("Failed to load settings");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -303,45 +327,23 @@ const Settings = () => {
     fetchSettings();
   }, []);
 
-  const fetchSettings = async () => {
-    try {
-      setLoading(true);
-      const res = await getMySettings();
-      const data = res.data.data;
-      setSettings({
-        name: data.name || "",
-        email: data.email || "",
-        phone_number: data.phone_number || "",
-        password: "",
-        currency: data.currency || "INR",
-        monthly_budget:
-          data.monthly_budget === null || data.monthly_budget === undefined
-            ? ""
-            : data.monthly_budget,
-        email_notifications: data.email_notifications ?? true,
-        push_notifications: data.push_notifications ?? false,
-        budget_alerts: data.budget_alerts ?? true,
-      });
-    } catch (error) {
-      console.error("Failed to fetch settings:", error);
-      toast.error("Failed to load settings");
-    } finally {
-      setLoading(false);
-    }
-  };
+  /* -------------------------------------------------------------------------- */
+  /*                                   SAVE                                     */
+  /* -------------------------------------------------------------------------- */
 
   const saveAlerts = async () => {
     try {
       setSaving(true);
+
       await updateMySettings({
         email_notifications: settings.email_notifications,
         push_notifications: settings.push_notifications,
         budget_alerts: settings.budget_alerts,
       });
+
       toast.success("Alert settings updated");
-    } catch (error) {
-      console.error(error);
-      toast.error(error?.response?.data?.detail || "Failed to update alerts");
+    } catch {
+      toast.error("Failed to update alerts");
     } finally {
       setSaving(false);
     }
@@ -350,29 +352,14 @@ const Settings = () => {
   const saveCurrency = async () => {
     try {
       setSaving(true);
-      await updateMySettings({ currency: settings.currency });
-      toast.success("Currency updated");
-    } catch (error) {
-      console.error(error);
-      toast.error(error?.response?.data?.detail || "Failed to update currency");
-    } finally {
-      setSaving(false);
-    }
-  };
 
-  const saveBudget = async () => {
-    try {
-      setSaving(true);
       await updateMySettings({
-        monthly_budget:
-          settings.monthly_budget === ""
-            ? null
-            : Number(settings.monthly_budget),
+        currency: settings.currency,
       });
-      toast.success("Monthly budget updated");
-    } catch (error) {
-      console.error(error);
-      toast.error(error?.response?.data?.detail || "Failed to update budget");
+
+      toast.success("Currency updated");
+    } catch {
+      toast.error("Failed to update currency");
     } finally {
       setSaving(false);
     }
@@ -381,129 +368,118 @@ const Settings = () => {
   const saveProfile = async () => {
     try {
       setSaving(true);
-      const payload = {
+
+      await updateMySettings({
         name: settings.name,
         email: settings.email,
         phone_number: settings.phone_number,
-      };
-      if (settings.password?.trim()) {
-        payload.password = settings.password;
-      }
-      await updateMySettings(payload);
-      setSettings((prev) => ({ ...prev, password: "" }));
+        password: settings.password,
+      });
+
       toast.success("Profile updated");
-    } catch (error) {
-      console.error(error);
-      toast.error(error?.response?.data?.detail || "Failed to update profile");
+    } catch {
+      toast.error("Failed to update profile");
     } finally {
       setSaving(false);
     }
   };
 
+  /* -------------------------------------------------------------------------- */
+  /*                                   UI                                       */
+  /* -------------------------------------------------------------------------- */
+
   return (
-    // ✅ FIX: Single root wrapper — all content including modals lives inside here
-    <div className="min-h-screen bg-linear-to-br from-slate-50 via-indigo-50 to-white">
-      {" "}
-      {/* Top strip */}
-      {/* <div className="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-3">
-        <h1 className="text-\[15px] font-semibold text-slate-700">Settings</h1>
-        <div className="flex items-center gap-4 text-slate-600">
-          <Bell size={18} />
-          <UserCircle2 size={22} />
-        </div>
-      </div> */}
-      <div className="w-full px-3 sm:px-6 md:px-10 py-4 sm:py-6">
-        <div className="w-full max-w-7xl mx-auto space-y-6">
-          {" "}
+    <div className="min-h-screen overflow-x-hidden bg-gradient-to-br from-slate-50 via-indigo-50 to-white">
+      <div className="w-full px-2 sm:px-4 md:px-6 lg:px-10 py-4 sm:py-6">
+        <div className="w-full max-w-7xl mx-auto space-y-5 sm:space-y-6">
           {/* Intro Card */}
-          <PageCard className="px-6 py-6   ">
-            <h2 className="text-4xl font-bold leading-none text-slate-800">
+          <PageCard className="px-4 sm:px-6 py-5 sm:py-6">
+            <h2 className="text-xl sm:text-2xl md:text-4xl font-bold text-slate-800 leading-tight">
               Settings
             </h2>
-            <p className="mt-3 text-sm text-slate-500">
-              Manage your alerts, currency, monthly budget, and account details.
+
+            <p className="mt-2 text-sm sm:text-base text-slate-500 leading-relaxed">
+              Manage your alerts, currency, monthly budget, and account
+              details.
             </p>
           </PageCard>
-          {/* Tab Card */}
-          <PageCard className="px-3 py-2 ">
-            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+
+          {/* Tabs */}
+          <PageCard className="px-2 sm:px-3 py-2 overflow-hidden">
+            <div className="grid grid-cols-4 sm:flex sm:flex-wrap gap-2 pb-1">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`whitespace-nowrap rounded-[10px] px-3 sm:px-5 py-2 sm:py-3 text-xs sm:text-sm font-semibold transition shrink-0 ${
+                  className={`rounded-xl px-2 sm:px-5 py-2 sm:py-3 text-[11px] sm:text-sm font-semibold transition-all duration-200 text-center leading-tight ${
                     activeTab === tab.id
                       ? "bg-indigo-500 text-white shadow-md"
-                      : "bg-white/70 shadow-sm text-slate-700 hover:bg-slate-200"
+                      : "bg-white/70 text-slate-700 shadow-sm hover:bg-slate-200"
                   }`}
                 >
-                  {tab.label}
+                  <span className="sm:hidden">{tab.label}</span>
+                  <span className="hidden sm:inline">{tab.fullLabel}</span>
                 </button>
               ))}
             </div>
           </PageCard>
-          {/* Main Content Card */}
-          <PageCard className="px-3 sm:px-8 py-4 sm:py-8">
-            {" "}
+
+          {/* Content */}
+          <PageCard className="px-3 sm:px-6 md:px-8 py-4 sm:py-6 md:py-8 overflow-hidden">
             {loading ? (
               <div className="py-10 text-sm text-slate-500">
                 Loading settings...
               </div>
             ) : (
               <>
-                {/* ── Alerts Tab ── */}
+                {/* ALERTS */}
                 {activeTab === "alerts" && (
                   <div className="space-y-5">
-                    <div className="flex justify-between items-center">
-                      <h3 className="text-[28px] font-semibold text-slate-800">
+                    <div className="flex items-center justify-between flex-wrap gap-3">
+                      <h3 className="text-xl sm:text-2xl md:text-3xl font-semibold text-slate-800">
                         Alert / Notification Settings
                       </h3>
 
                       <button
-                        onClick={() => setIsEditingAlerts((prev) => !prev)}
-                        className="text-sm font-semibold text-[#5848F6]"
+                        onClick={() =>
+                          setIsEditingAlerts((prev) => !prev)
+                        }
+                        className="text-sm font-semibold text-indigo-600"
                       >
                         {isEditingAlerts ? "Cancel" : "Edit"}
                       </button>
                     </div>
+
                     <div className="space-y-4">
                       <ToggleRow
                         label="Email Notifications"
-                        description="Receive account and activity updates by email."
+                        description="Receive updates by email."
                         checked={settings.email_notifications}
                         disabled={!isEditingAlerts}
                         onChange={() =>
                           setSettings((prev) => ({
                             ...prev,
-                            email_notifications: !prev.email_notifications,
+                            email_notifications:
+                              !prev.email_notifications,
                           }))
                         }
                       />
+
                       <ToggleRow
                         label="Push Notifications"
-                        description="Get quick alerts directly inside the app."
+                        description="Get alerts inside app."
                         checked={settings.push_notifications}
                         disabled={!isEditingAlerts}
                         onChange={() =>
                           setSettings((prev) => ({
                             ...prev,
-                            push_notifications: !prev.push_notifications,
-                          }))
-                        }
-                      />
-                      <ToggleRow
-                        label="Budget Alerts"
-                        description="Notify when your monthly spending nears the limit."
-                        checked={settings.budget_alerts}
-                        disabled={!isEditingAlerts}
-                        onChange={() =>
-                          setSettings((prev) => ({
-                            ...prev,
-                            budget_alerts: !prev.budget_alerts,
+                            push_notifications:
+                              !prev.push_notifications,
                           }))
                         }
                       />
                     </div>
+
                     {isEditingAlerts && (
                       <SaveButton
                         onClick={saveAlerts}
@@ -514,22 +490,25 @@ const Settings = () => {
                   </div>
                 )}
 
-                {/* ── Currency Tab ── */}
+                {/* CURRENCY */}
                 {activeTab === "currency" && (
                   <div className="space-y-5">
-                    <div className="flex justify-between items-center">
-                      <h3 className="text-[28px] font-semibold text-slate-800">
+                    <div className="flex items-center justify-between flex-wrap gap-3">
+                      <h3 className="text-xl sm:text-2xl md:text-3xl font-semibold text-slate-800">
                         Default Currency
                       </h3>
 
                       <button
-                        onClick={() => setIsEditingCurrency((prev) => !prev)}
-                        className="text-sm font-semibold text-[#5848F6]"
+                        onClick={() =>
+                          setIsEditingCurrency((prev) => !prev)
+                        }
+                        className="text-sm font-semibold text-indigo-600"
                       >
                         {isEditingCurrency ? "Cancel" : "Edit"}
                       </button>
                     </div>
-                    <div className="max-w-2xl bg-slate-50 rounded-xl px-4 py-3">
+
+                    <div className="w-full max-w-2xl bg-slate-50 rounded-xl px-3 sm:px-4 py-3">
                       <SelectField
                         label="Choose Currency"
                         value={settings.currency}
@@ -544,6 +523,7 @@ const Settings = () => {
                         icon={<BadgeDollarSign size={18} />}
                       />
                     </div>
+
                     {isEditingCurrency && (
                       <SaveButton
                         onClick={saveCurrency}
@@ -554,42 +534,46 @@ const Settings = () => {
                   </div>
                 )}
 
-                {/* ── Budget Tab ── */}
+                {/* BUDGET */}
                 {activeTab === "budget" && (
                   <div className="space-y-6">
-                    <h3 className="text-\[28px] font-semibold text-slate-800">
+                    <h3 className="text-xl sm:text-2xl md:text-3xl font-semibold text-slate-800">
                       Monthly Budget Settings
                     </h3>
 
-                    {/* ── Two Panels ── */}
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 ">
-                      {/* ── Income Budget Panel ── */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                       <BudgetPanel
                         title="Income Budget"
                         type="income"
-                        budgets={budgets.filter((b) => b?.type === "income")}
+                        budgets={budgets.filter(
+                          (b) => b?.type === "income"
+                        )}
                         isEditing={isEditingIncome}
-                        onToggleEdit={() => setIsEditingIncome((prev) => !prev)}
+                        onToggleEdit={() =>
+                          setIsEditingIncome((prev) => !prev)
+                        }
                         onAdd={() => {
                           setBudgetFormType("income");
                           setShowBudgetForm(true);
                         }}
-                        onEditChip={(b) => {
-                          setSelectedBudget(b);
-                          setEditBudget({ name: b.name, amount: b.amount });
-                          setShowEditBudgetForm(true);
-                        }}
-                        onDeleteChip={(b) => {
-                          setDeleteItem(b);
-                          setShowDeleteConfirm(true);
+                        onEditChip={(b) => {}}
+                        onDeleteChip={async (b) => {
+                          try {
+                            await API.delete(`/categories/${b.id}`);
+                            await fetchCategories();
+                            toast.success("Category deleted");
+                          } catch {
+                            toast.error("Failed to delete");
+                          }
                         }}
                       />
 
-                      {/* ── Expense Budget Panel ── */}
                       <BudgetPanel
                         title="Expense Budget"
                         type="expense"
-                        budgets={budgets.filter((b) => b?.type === "expense")} // ✅ FIX
+                        budgets={budgets.filter(
+                          (b) => b?.type === "expense"
+                        )}
                         isEditing={isEditingExpense}
                         onToggleEdit={() =>
                           setIsEditingExpense((prev) => !prev)
@@ -598,42 +582,40 @@ const Settings = () => {
                           setBudgetFormType("expense");
                           setShowBudgetForm(true);
                         }}
-                        onEditChip={(b) => {
-                          setSelectedBudget(b);
-                          setEditBudget({ name: b.name, amount: b.amount });
-                          setShowEditBudgetForm(true);
-                        }}
-                        onDeleteChip={(b) => {
-                          setDeleteItem(b);
-                          setShowDeleteConfirm(true);
+                        onEditChip={(b) => {}}
+                        onDeleteChip={async (b) => {
+                          try {
+                            await API.delete(`/categories/${b.id}`);
+                            await fetchCategories();
+                            toast.success("Category deleted");
+                          } catch {
+                            toast.error("Failed to delete");
+                          }
                         }}
                       />
                     </div>
-
-                    <SaveButton
-                      onClick={saveBudget}
-                      saving={saving}
-                      text="Save Budget"
-                    />
                   </div>
                 )}
 
-                {/* ── Profile Tab ── */}
+                {/* PROFILE */}
                 {activeTab === "profile" && (
                   <div className="space-y-5">
-                    <div className="flex justify-between items-center">
-                      <h3 className="text-3xl font-semibold text-slate-800">
+                    <div className="flex items-center justify-between flex-wrap gap-3">
+                      <h3 className="text-xl sm:text-2xl md:text-3xl font-semibold text-slate-800">
                         Profile / Account Settings
                       </h3>
 
                       <button
-                        onClick={() => setIsEditingProfile((prev) => !prev)}
-                        className="text-sm font-semibold text-[#5848F6]"
+                        onClick={() =>
+                          setIsEditingProfile((prev) => !prev)
+                        }
+                        className="text-sm font-semibold text-indigo-600"
                       >
-                        {isEditingProfile ? "Cancel" : "Edit"}{" "}
+                        {isEditingProfile ? "Cancel" : "Edit"}
                       </button>
                     </div>
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <Field
                         label="Full Name"
                         value={settings.name}
@@ -647,9 +629,9 @@ const Settings = () => {
                         placeholder="Enter your name"
                         icon={<UserCircle2 size={18} />}
                       />
+
                       <Field
                         label="Email"
-                        type="email"
                         value={settings.email}
                         disabled={!isEditingProfile}
                         onChange={(e) =>
@@ -658,9 +640,10 @@ const Settings = () => {
                             email: e.target.value,
                           }))
                         }
-                        placeholder="Enter your email"
+                        placeholder="Enter email"
                         icon={<Mail size={18} />}
                       />
+
                       <Field
                         label="Phone Number"
                         value={settings.phone_number}
@@ -671,11 +654,12 @@ const Settings = () => {
                             phone_number: e.target.value,
                           }))
                         }
-                        placeholder="Enter your phone number"
+                        placeholder="Enter phone number"
                         icon={<Smartphone size={18} />}
                       />
+
                       <Field
-                        label="New Password"
+                        label="Password"
                         type="password"
                         value={settings.password}
                         disabled={!isEditingProfile}
@@ -685,15 +669,18 @@ const Settings = () => {
                             password: e.target.value,
                           }))
                         }
-                        placeholder="Leave blank if no change"
+                        placeholder="New password"
                         icon={<Lock size={18} />}
                       />
                     </div>
-                    <SaveButton
-                      onClick={saveProfile}
-                      saving={saving}
-                      text="Save Profile"
-                    />
+
+                    {isEditingProfile && (
+                      <SaveButton
+                        onClick={saveProfile}
+                        saving={saving}
+                        text="Save Profile"
+                      />
+                    )}
                   </div>
                 )}
               </>
@@ -701,172 +688,64 @@ const Settings = () => {
           </PageCard>
         </div>
       </div>
-      {/* ✅ FIX: All modals placed INSIDE the root wrapper div */}
-      {/* Edit Budget Modal */}
-      {showEditBudgetForm && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-xl w-96 space-y-4">
-            <h3 className="text-lg font-semibold text-slate-800">
-              Edit Budget
-            </h3>
-            <input
-              value={editBudget.name}
-              onChange={(e) =>
-                setEditBudget({ ...editBudget, name: e.target.value })
-              }
-              className="w-full border p-2 rounded-lg"
-              placeholder="Budget name"
-            />
-            {/* <input
-              type="number"
-              value={editBudget.amount}
-              onChange={(e) =>
-                setEditBudget({ ...editBudget, amount: e.target.value })
-              }
-              className="w-full border p-2 rounded-lg"
-              placeholder="Amount"
-            /> */}
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setShowEditBudgetForm(false)}
-                className="px-4 py-2 rounded-lg bg-slate-100 text-slate-700 text-sm font-semibold"
-              >
-                Close
-              </button>
-              <button
-                onClick={async () => {
-                  try {
-                    if (!editBudget.name.trim()) {
-                      toast.error("Name is required");
-                      return;
-                    }
 
-                    await API.patch(`/categories/${selectedBudget.id}`, {
-                      name: editBudget.name.trim(),
-                      type: selectedBudget.type,
-                    });
-
-                    toast.success("Category updated");
-                    setShowEditBudgetForm(false);
-                    fetchCategories();
-                  } catch (err) {
-                    toast.error(err?.response?.data?.detail || "Update failed");
-                  }
-                }}
-                className="px-4 py-2 rounded-lg bg-indigo-500 hover:bg-indigo-600 shadow text-white text-sm font-semibold"
-              >
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-      {/* Add Budget Modal */}
+      {/* ADD BUDGET MODAL */}
       {showBudgetForm && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-xl w-96 space-y-4 shadow-xl">
-            <h3 className="text-lg font-semibold text-slate-800">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-3">
+          <div className="bg-white w-full max-w-md rounded-2xl p-5 sm:p-6 shadow-2xl space-y-4">
+            <h3 className="text-lg sm:text-xl font-semibold text-slate-800">
               Add {budgetFormType === "income" ? "Income" : "Expense"} Budget
             </h3>
 
             <input
-              placeholder={
-                budgetFormType === "income"
-                  ? "Name (e.g. Salary, Bonus)"
-                  : "Name (e.g. Food, Rent)"
-              }
+              placeholder="Enter category name"
               value={newBudget.name}
               onChange={(e) =>
-                setNewBudget({ ...newBudget, name: e.target.value })
+                setNewBudget({
+                  ...newBudget,
+                  name: e.target.value,
+                })
               }
-              className="w-full border border-slate-300 p-2.5 rounded-lg text-sm outline-none focus:border-[#5848F6]"
+              className="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm outline-none focus:border-indigo-500"
             />
 
-            <div className="flex justify-end gap-2 pt-1">
+            <div className="flex flex-col sm:flex-row justify-end gap-2 pt-2">
               <button
-                onClick={() => {
-                  setShowBudgetForm(false);
-                  setNewBudget({ name: "", amount: "" });
-                }}
-                className="px-4 py-2 rounded-lg bg-slate-100 text-slate-700 text-sm font-semibold"
+                onClick={() => setShowBudgetForm(false)}
+                className="w-full sm:w-auto px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-sm font-semibold"
               >
                 Cancel
               </button>
 
               <button
-                disabled={!newBudget.name.trim() || savingCategory}
                 onClick={async () => {
+                  if (!newBudget.name.trim()) return;
                   try {
-                    setSavingCategory(true); // ✅ START LOADING
-
-                    if (!newBudget.name.trim()) {
-                      toast.error("Name is required");
-                      return;
-                    }
-
-                    if (
-                      budgets.some(
-                        (b) =>
-                          b.name.toLowerCase() ===
-                          newBudget.name.trim().toLowerCase(),
-                      )
-                    ) {
-                      toast.error("Category already exists");
-                      return;
-                    }
-
+                    setSavingCategory(true);
                     await API.post("/categories", {
                       name: newBudget.name.trim(),
                       type: budgetFormType,
                     });
-
-                    toast.success("Category added");
-
-                    setShowBudgetForm(false);
+                    await fetchCategories();
                     setNewBudget({ name: "", amount: "" });
-                    fetchCategories();
-                  } catch (err) {
-                    toast.error(
-                      err?.response?.data?.detail || "Failed to add category",
-                    );
+                    setShowBudgetForm(false);
+                    toast.success("Category added");
+                  } catch {
+                    toast.error("Failed to add category");
                   } finally {
-                    setSavingCategory(false); // ✅ STOP LOADING
+                    setSavingCategory(false);
                   }
                 }}
-                className="px-4 py-2 rounded-lg bg-indigo-500 hover:bg-indigo-600 shadow text-white text-sm font-semibold disabled:opacity-60"
+                disabled={!newBudget.name.trim() || savingCategory}
+                className="w-full sm:w-auto px-4 py-2 rounded-xl bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-semibold disabled:opacity-60"
               >
-                {savingCategory ? "Saving..." : "Save"} {/* ✅ TEXT CHANGE */}
+                {savingCategory ? "Saving..." : "Save"}
               </button>
             </div>
           </div>
         </div>
       )}
-      {/* Delete Confirm Modal */}
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-xl w-80 text-center space-y-3">
-            <h3 className="text-lg font-semibold text-slate-800">
-              Confirm Delete ❗
-            </h3>
-            <p className="text-sm text-slate-600">Delete {deleteItem?.name}?</p>
-            <div className="flex justify-center gap-4 mt-4">
-              <button
-                onClick={() => setShowDeleteConfirm(false)}
-                className="px-4 py-2 rounded-lg bg-slate-100 text-slate-700 text-sm font-semibold"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmDelete}
-                className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold"
-              >
-                OK
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div> // ← single root closing tag
+    </div>
   );
 };
 

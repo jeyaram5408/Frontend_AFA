@@ -13,6 +13,8 @@ import {
   getTransactions,
   createTransaction,
   deleteTransactionApi,
+  updateTransactionApi,
+  
 } from "../api/transactionApi";
 
 const Transactions = () => {
@@ -41,7 +43,7 @@ const Transactions = () => {
     income: [],
     expense: [],
   });
-
+  
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
@@ -76,7 +78,18 @@ const Transactions = () => {
       setLoading(false);
     }
   };
-
+  const handleEditSave = async () => {
+  await updateTransactionApi(editData.id, {
+    title: editData.title,
+    amount: parseFloat(editData.amount),
+    category: editData.category,
+    date: editData.date,
+    type: editData.type,
+  });
+  await fetchTransactions(); // re-fetch pannu
+  setShowEdit(false);
+  toast.success("Updated ✅");
+};
   // =============================
   // LAST 1 MONTH FILTER
   // =============================
